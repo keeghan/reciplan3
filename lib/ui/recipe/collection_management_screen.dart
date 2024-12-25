@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
 import '../widgets/recipe_card.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CollectionManagementScreen extends StatefulWidget {
   final String collectionId;
@@ -68,22 +67,22 @@ class _CollectionManagementScreenState
             return RecipeCard(
               onCheckPress: () {
                 if (recipe.collection) {
-                  makeToast("Recipe already in collection");
+                  showSnackBar(context, "Recipe already in collection");
                   return;
                 }
                 final updatedRecipe = recipe.copyWith(collection: true);
                 _viewModel.updateRecipe(updatedRecipe);
                 //Todo: fix, get confirmation from viewmodel
-                makeToast("${recipe.name} added");
+                showSnackBar(context, "${recipe.name} added");
               },
               onRemovePress: () {
                 if (!recipe.collection) {
-                  makeToast("Recipe is not in collection");
+                  showSnackBar(context, "Recipe is not in collection");
                   return;
                 }
                 final updatedRecipe = recipe.copyWith(collection: false);
                 _viewModel.updateRecipe(updatedRecipe);
-                makeToast("${recipe.name} added");
+                showSnackBar(context, "${recipe.name} removed");
               },
               title: recipe.name,
               description:
@@ -95,10 +94,12 @@ class _CollectionManagementScreenState
   }
 }
 
-makeToast(String msg) {
-  Fluttertoast.showToast(
-    msg: msg,
-    toastLength: Toast.LENGTH_SHORT,
-    gravity: ToastGravity.BOTTOM,
+void showSnackBar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+      behavior: SnackBarBehavior.floating,
+    ),
   );
 }
