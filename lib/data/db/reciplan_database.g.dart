@@ -224,6 +224,23 @@ class _$RecipeDao extends RecipeDao {
   }
 
   @override
+  Future<void> clearCollection() async {
+    await _queryAdapter
+        .queryNoReturn('UPDATE recipe_table SET collection = 0, favorite = 0');
+  }
+
+  @override
+  Future<void> clearFavorite() async {
+    await _queryAdapter.queryNoReturn('UPDATE recipe_table SET favorite = 0');
+  }
+
+  @override
+  Future<void> clearPlans() async {
+    await _queryAdapter.queryNoReturn(
+        'UPDATE day_table SET breakfast = 0, lunch = 1, dinner = 2');
+  }
+
+  @override
   Future<Recipe?> getRecipe(int recipeId) async {
     return _queryAdapter.query('SELECT * FROM recipe_table WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Recipe(
@@ -260,26 +277,6 @@ class _$RecipeDao extends RecipeDao {
   }
 
   @override
-  Stream<List<Recipe>> getCollectionsRecipes() {
-    return _queryAdapter.queryListStream(
-        'SELECT * FROM recipe_table WHERE collection = 1 ORDER BY id DESC',
-        mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
-            name: row['name'] as String,
-            mins: row['mins'] as int,
-            numIngredients: row['numIngredients'] as int,
-            direction: row['direction'] as String,
-            ingredients: row['ingredients'] as String,
-            imageUrl: row['imageUrl'] as String,
-            collection: (row['collection'] as int) != 0,
-            favorite: (row['favorite'] as int) != 0,
-            mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
-        queryableName: 'recipe_table',
-        isView: false);
-  }
-
-  @override
   Stream<List<Recipe>> getFavoriteRecipes() {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE favorite = 1 ORDER BY id DESC',
@@ -300,49 +297,9 @@ class _$RecipeDao extends RecipeDao {
   }
 
   @override
-  Stream<List<Recipe>> getSnackRecipes() {
-    return _queryAdapter.queryListStream(
-        'SELECT * FROM recipe_table WHERE type = \'snack\' ORDER BY id',
-        mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
-            name: row['name'] as String,
-            mins: row['mins'] as int,
-            numIngredients: row['numIngredients'] as int,
-            direction: row['direction'] as String,
-            ingredients: row['ingredients'] as String,
-            imageUrl: row['imageUrl'] as String,
-            collection: (row['collection'] as int) != 0,
-            favorite: (row['favorite'] as int) != 0,
-            mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
-        queryableName: 'recipe_table',
-        isView: false);
-  }
-
-  @override
   Stream<List<Recipe>> getBreakfastRecipes() {
     return _queryAdapter.queryListStream(
-        'SELECT * FROM recipe_table WHERE type = \'breakfast\' ORDER BY id',
-        mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
-            name: row['name'] as String,
-            mins: row['mins'] as int,
-            numIngredients: row['numIngredients'] as int,
-            direction: row['direction'] as String,
-            ingredients: row['ingredients'] as String,
-            imageUrl: row['imageUrl'] as String,
-            collection: (row['collection'] as int) != 0,
-            favorite: (row['favorite'] as int) != 0,
-            mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
-        queryableName: 'recipe_table',
-        isView: false);
-  }
-
-  @override
-  Stream<List<Recipe>> getDinnerRecipes() {
-    return _queryAdapter.queryListStream(
-        'SELECT * FROM recipe_table WHERE type = \'dinner\'',
+        'SELECT * FROM recipe_table WHERE mealType = 0 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
             id: row['id'] as int,
             name: row['name'] as String,
@@ -362,7 +319,7 @@ class _$RecipeDao extends RecipeDao {
   @override
   Stream<List<Recipe>> getLunchRecipes() {
     return _queryAdapter.queryListStream(
-        'SELECT * FROM recipe_table WHERE type = \'lunch\'',
+        'SELECT * FROM recipe_table WHERE mealType = 1 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
             id: row['id'] as int,
             name: row['name'] as String,
@@ -380,20 +337,63 @@ class _$RecipeDao extends RecipeDao {
   }
 
   @override
-  Future<void> clearCollection() async {
-    await _queryAdapter
-        .queryNoReturn('UPDATE recipe_table SET collection = 0, favorite = 0');
+  Stream<List<Recipe>> getDinnerRecipes() {
+    return _queryAdapter.queryListStream(
+        'SELECT * FROM recipe_table WHERE mealType = 2 ORDER BY id DESC',
+        mapper: (Map<String, Object?> row) => Recipe(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            mins: row['mins'] as int,
+            numIngredients: row['numIngredients'] as int,
+            direction: row['direction'] as String,
+            ingredients: row['ingredients'] as String,
+            imageUrl: row['imageUrl'] as String,
+            collection: (row['collection'] as int) != 0,
+            favorite: (row['favorite'] as int) != 0,
+            mealType: row['mealType'] as int,
+            userCreated: (row['userCreated'] as int) != 0),
+        queryableName: 'recipe_table',
+        isView: false);
   }
 
   @override
-  Future<void> clearFavorite() async {
-    await _queryAdapter.queryNoReturn('UPDATE recipe_table SET favorite = 0');
+  Stream<List<Recipe>> getSnackRecipes() {
+    return _queryAdapter.queryListStream(
+        'SELECT * FROM recipe_table WHERE mealType = 3 ORDER BY id DESC',
+        mapper: (Map<String, Object?> row) => Recipe(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            mins: row['mins'] as int,
+            numIngredients: row['numIngredients'] as int,
+            direction: row['direction'] as String,
+            ingredients: row['ingredients'] as String,
+            imageUrl: row['imageUrl'] as String,
+            collection: (row['collection'] as int) != 0,
+            favorite: (row['favorite'] as int) != 0,
+            mealType: row['mealType'] as int,
+            userCreated: (row['userCreated'] as int) != 0),
+        queryableName: 'recipe_table',
+        isView: false);
   }
 
   @override
-  Future<void> clearPlans() async {
-    await _queryAdapter.queryNoReturn(
-        'UPDATE day_table SET breakfast = 0, lunch = 1, dinner = 2');
+  Stream<List<Recipe>> getAllCollectionsRecipes() {
+    return _queryAdapter.queryListStream(
+        'SELECT * FROM recipe_table WHERE collection = 1 ORDER BY id DESC',
+        mapper: (Map<String, Object?> row) => Recipe(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            mins: row['mins'] as int,
+            numIngredients: row['numIngredients'] as int,
+            direction: row['direction'] as String,
+            ingredients: row['ingredients'] as String,
+            imageUrl: row['imageUrl'] as String,
+            collection: (row['collection'] as int) != 0,
+            favorite: (row['favorite'] as int) != 0,
+            mealType: row['mealType'] as int,
+            userCreated: (row['userCreated'] as int) != 0),
+        queryableName: 'recipe_table',
+        isView: false);
   }
 
   @override

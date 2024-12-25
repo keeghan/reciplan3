@@ -16,7 +16,6 @@ class Recipe {
   final int mealType;
   final bool userCreated;
 
-
   Recipe({
     required this.id,
     required this.name,
@@ -34,5 +33,33 @@ class Recipe {
   @override
   String toString() {
     return 'Recipe(name: $name, type: $mealType)\n';
+  }
+
+  Recipe copyWith({
+    int? id,
+    String? name,
+    int? mins,
+    int? numIngredients,
+    String? direction,
+    String? ingredients,
+    String? imageUrl,
+    bool? collection,
+    bool? favorite,
+    int? mealType,
+    bool? userCreated,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      mins: mins ?? this.mins,
+      numIngredients: numIngredients ?? this.numIngredients,
+      direction: direction ?? this.direction,
+      ingredients: ingredients ?? this.ingredients,
+      imageUrl: imageUrl ?? this.imageUrl,
+      collection: collection ?? this.collection,
+      favorite: favorite ?? this.favorite,
+      mealType: mealType ?? this.mealType,
+      userCreated: userCreated ?? this.userCreated,
+    );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
 import '../widgets/recipe_card.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CollectionManagementScreen extends StatefulWidget {
   final String collectionId;
@@ -22,10 +22,7 @@ class _CollectionManagementScreenState
     super.initState();
     _viewModel = locator.get<RecipeViewModel>();
     _loadRecipes();
-    print("loaded");
-    print(_viewModel.recipes.length.toString());
 
-    // Listen to changes in viewModel
     _viewModel.addListener(() {
       if (mounted) {
         setState(() {});
@@ -34,19 +31,18 @@ class _CollectionManagementScreenState
   }
 
   void _loadRecipes() {
+    RecipeType type;
     switch (widget.collectionId) {
       case 'Breakfast':
-        _viewModel.loadBreakfastRecipes();
-        break;
+        type = RecipeType.breakfast;
       case 'Lunch':
-        _viewModel.loadLunchRecipes();
-        break;
+        type = RecipeType.lunch;
       case 'Dinner':
-        _viewModel.loadDinnerRecipes();
-        break;
+        type = RecipeType.dinner;
       default:
-        _viewModel.loadSnackRecipes();
+        type = RecipeType.snack;
     }
+    _viewModel.loadRecipes(type);
   }
 
   @override
@@ -57,26 +53,52 @@ class _CollectionManagementScreenState
     super.dispose();
   }
 
+  //Main ListView with RecipeCards for adding to or removing
+  //Recipes from Collection
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.collectionId),
       ),
-      body:
-          //Center(child: Text(_viewModel.recipes.length.toString())
-          ListView.builder(
-        itemCount: _viewModel.recipes.length,
-        itemBuilder: (context, index) {
-          final recipe = _viewModel.recipes[index];
-          return RecipeCard(
-            title: recipe.name,
-            description:
-                '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
-            imageUrl: recipe.imageUrl,
-          );
-        },
-      ),
+      body: ListView.builder(
+          itemCount: _viewModel.recipes.length,
+          itemBuilder: (context, index) {
+            final recipe = _viewModel.recipes[index];
+            return RecipeCard(
+              onCheckPress: () {
+                if (recipe.collection) {
+                  makeToast("Recipe already in collection");
+                  return;
+                }
+                final updatedRecipe = recipe.copyWith(collection: true);
+                _viewModel.updateRecipe(updatedRecipe);
+                //Todo: fix, get confirmation from viewmodel
+                makeToast("${recipe.name} added");
+              },
+              onRemovePress: () {
+                if (!recipe.collection) {
+                  makeToast("Recipe is not in collection");
+                  return;
+                }
+                final updatedRecipe = recipe.copyWith(collection: false);
+                _viewModel.updateRecipe(updatedRecipe);
+                makeToast("${recipe.name} added");
+              },
+              title: recipe.name,
+              description:
+                  '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
+              imageUrl: recipe.imageUrl,
+            );
+          }),
     );
   }
+}
+
+makeToast(String msg) {
+  Fluttertoast.showToast(
+    msg: msg,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+  );
 }

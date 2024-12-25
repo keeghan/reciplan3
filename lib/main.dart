@@ -12,12 +12,15 @@ import 'ui/my_home_page.dart';
 final locator = GetIt.instance;
 
 Future<void> setupLocator() async {
-  locator.registerSingletonAsync<ReciplanDatabase>(() => DatabaseProvider.database);
+  locator.registerSingletonAsync<ReciplanDatabase>(
+      () => DatabaseProvider.database);
   locator.registerSingletonAsync<RecipeDao>(() => DatabaseProvider.recipeDao);
   locator.registerSingletonAsync<DayDao>(() => DatabaseProvider.dayDao);
   await locator.allReady();
-  locator.registerSingleton<RecipeRepository>(RecipeRepository(locator<RecipeDao>()));
-  locator.registerFactory<RecipeViewModel>(() => RecipeViewModel(locator<RecipeRepository>()));
+  locator.registerSingleton<RecipeRepository>(
+      RecipeRepository(locator<RecipeDao>()));
+  locator.registerFactory<RecipeViewModel>(
+      () => RecipeViewModel(locator<RecipeRepository>()));
 }
 
 void main() async {
@@ -34,7 +37,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          secondary: const Color.fromARGB(222, 201, 128, 4),
+        ),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),

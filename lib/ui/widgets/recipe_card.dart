@@ -1,35 +1,74 @@
 import 'package:flutter/material.dart';
 
+import 'network_image_with_placeholder.dart';
+
 class RecipeCard extends StatelessWidget {
   final String title;
   final String description;
   final String imageUrl;
+  final VoidCallback onCheckPress;
+  final VoidCallback onRemovePress;
 
-  const RecipeCard ({
+  const RecipeCard({
     super.key,
     required this.title,
     required this.description,
     required this.imageUrl,
+    required this.onCheckPress,
+    required this.onRemovePress,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      margin: const EdgeInsets.fromLTRB(50,24,50,24),
+      margin: const EdgeInsets.fromLTRB(50, 24, 50, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: Image.network(
-            imageUrl,
-            height: 250,
-            width: double.infinity,
-            fit: BoxFit.cover,
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+                child: NetworkImageWithPlaceholder(
+                  imageUrl: imageUrl,
+                  height: 250,
+                  width: double.infinity,
+                ),
+              ),
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.check),
+                        onPressed: onCheckPress,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.cancel),
+                        onPressed: onRemovePress,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
@@ -48,7 +87,7 @@ class RecipeCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(6,2,8,2),
+            padding: const EdgeInsets.fromLTRB(6, 2, 8, 2),
             child: OverflowBar(
               alignment: MainAxisAlignment.start,
               children: [

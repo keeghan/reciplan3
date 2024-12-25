@@ -5,6 +5,8 @@ import '../entities/recipe.dart';
 
 @dao
 abstract class RecipeDao {
+  //Update Functions
+
   @insert
   Future<void> insertRecipe(Recipe recipe);
 
@@ -26,6 +28,18 @@ abstract class RecipeDao {
   @Query('UPDATE day_table SET dinner = 2 WHERE dinner = :recipeId')
   Future<void> clearRecipeFromDinner(int recipeId);
 
+  @Query("UPDATE recipe_table SET collection = 0, favorite = 0")
+  Future<void> clearCollection();
+
+  @Query("UPDATE recipe_table SET favorite = 0")
+  Future<void> clearFavorite();
+
+  @Query("UPDATE day_table SET breakfast = 0, lunch = 1, dinner = 2")
+  Future<void> clearPlans();
+
+  @Insert(onConflict: OnConflictStrategy.replace)
+  Future<void> insertRecipes(List<Recipe> recipes);
+
   @transaction
   Future<void> deleteRecipeWithClear(Recipe recipe) async {
     switch (recipe.mealType) {
@@ -44,38 +58,31 @@ abstract class RecipeDao {
     await deleteRecipe(recipe);
   }
 
+  //Retrieval Functions
   @Query('SELECT * FROM recipe_table WHERE id = :recipeId')
   Future<Recipe?> getRecipe(int recipeId);
 
   @Query('SELECT * FROM recipe_table ORDER BY id DESC')
   Future<List<Recipe>> getAllRecipes();
 
-  @Query('SELECT * FROM recipe_table WHERE collection = 1 ORDER BY id DESC')
-  Stream<List<Recipe>> getCollectionsRecipes();
-
   @Query('SELECT * FROM recipe_table WHERE favorite = 1 ORDER BY id DESC')
   Stream<List<Recipe>> getFavoriteRecipes();
 
-  @Query("SELECT * FROM recipe_table WHERE type = 'snack' ORDER BY id")
-  Stream<List<Recipe>> getSnackRecipes();
-
-  @Query("SELECT * FROM recipe_table WHERE type = 'breakfast' ORDER BY id")
+  @Query("SELECT * FROM recipe_table WHERE mealType = 0 ORDER BY id DESC")
   Stream<List<Recipe>> getBreakfastRecipes();
 
-  @Query("SELECT * FROM recipe_table WHERE type = 'dinner'")
-  Stream<List<Recipe>> getDinnerRecipes();
-
-  @Query("SELECT * FROM recipe_table WHERE type = 'lunch'")
+  @Query("SELECT * FROM recipe_table WHERE mealType = 1 ORDER BY id DESC")
   Stream<List<Recipe>> getLunchRecipes();
 
-  @Query("UPDATE recipe_table SET collection = 0, favorite = 0")
-  Future<void> clearCollection();
+  @Query("SELECT * FROM recipe_table WHERE mealType = 2 ORDER BY id DESC")
+  Stream<List<Recipe>> getDinnerRecipes();
 
-  @Query("UPDATE recipe_table SET favorite = 0")
-  Future<void> clearFavorite();
+  @Query("SELECT * FROM recipe_table WHERE mealType = 3 ORDER BY id DESC")
+  Stream<List<Recipe>> getSnackRecipes();
 
-  @Query("UPDATE day_table SET breakfast = 0, lunch = 1, dinner = 2")
-  Future<void> clearPlans();
+  //Collection functions
+  @Query('SELECT * FROM recipe_table WHERE collection = 1 ORDER BY id DESC')
+  Stream<List<Recipe>> getAllCollectionsRecipes();
 
   @Query("SELECT * FROM recipe_table WHERE mealType = 0 AND collection = 1")
   Stream<List<Recipe>> getBreakfastCollectionRecipes();
@@ -91,9 +98,6 @@ abstract class RecipeDao {
 
   @Query("SELECT * FROM recipe_table WHERE id IN (:dayIDs)")
   Future<List<Recipe>> getActiveDayRecipes(List<int> dayIDs);
-
-  @Insert(onConflict: OnConflictStrategy.replace)
-  Future<void> insertRecipes(List<Recipe> recipes);
 
   @Query('''
     SELECT * FROM recipe_table 
