@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reciplan3/util/util.dart';
 
 import 'add/add_page.dart';
 import 'plan/plan_page.dart';
@@ -34,7 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: ReciplanCustomColors.appBarColor,
+        foregroundColor: Colors.white,
         title: const Text('Reciplan'),
         actions: [
           IconButton(

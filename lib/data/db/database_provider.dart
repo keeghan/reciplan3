@@ -1,4 +1,5 @@
 import 'package:floor/floor.dart';
+import 'package:reciplan3/util/yt_links.dart';
 
 import '../../util/data.dart';
 import '../../util/util.dart';
@@ -27,7 +28,7 @@ class DatabaseProvider {
           // Insert all recipes first
           for (var recipe in recipes) {
             await database.execute(
-              'INSERT INTO recipe_table (id, name, mins, numIngredients, direction, ingredients, imageUrl, collection, favorite, mealType, userCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+              'INSERT INTO recipe_table (id, name, mins, numIngredients, direction, ingredients, imageUrl, collection, favorite, mealType, userCreated, videoLink) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
               [
                 recipe.id,
                 recipe.name,
@@ -40,6 +41,7 @@ class DatabaseProvider {
                 recipe.favorite ? 1 : 0,
                 recipe.mealType,
                 recipe.userCreated ? 1 : 0,
+                recipe.videoLink
               ],
             );
             print('====${recipe.id}====');
@@ -96,7 +98,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.missing0,
         collection: false,
         favorite: false,
-        mealType: MealType.breakfast),
+        mealType: MealType.breakfast,
+        videoLink: RecipeVideoUrls.missing0),
     Recipe(
         id: 1,
         name: "Lunch not Set",
@@ -107,7 +110,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.missing0,
         collection: false,
         favorite: false,
-        mealType: MealType.lunch),
+        mealType: MealType.lunch,
+        videoLink: RecipeVideoUrls.missing0),
     Recipe(
         id: 2,
         name: "Dinner not Set",
@@ -118,7 +122,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.missing0,
         collection: false,
         favorite: false,
-        mealType: MealType.dinner),
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.missing0),
     Recipe(
         id: 3,
         name: "Hausa Kooko",
@@ -129,7 +134,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.hausa_Kooko,
         collection: true,
         favorite: true,
-        mealType: MealType.breakfast),
+        mealType: MealType.breakfast,
+        videoLink: RecipeVideoUrls.hausa_Kooko),
     Recipe(
         id: 4,
         name: "Koose (Spicy Bean Cake)",
@@ -140,7 +146,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.koose,
         collection: true,
         favorite: true,
-        mealType: MealType.breakfast),
+        mealType: MealType.breakfast,
+        videoLink: RecipeVideoUrls.koose),
     Recipe(
         id: 5,
         name: "Yam Balls",
@@ -151,7 +158,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.yam_Balls,
         collection: true,
         favorite: true,
-        mealType: MealType.snack),
+        mealType: MealType.snack,
+        videoLink: RecipeVideoUrls.yam_Balls),
     Recipe(
         id: 6,
         name: "Kelewele",
@@ -162,7 +170,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.kelewele,
         collection: false,
         favorite: false,
-        mealType: MealType.snack),
+        mealType: MealType.snack,
+        videoLink: RecipeVideoUrls.kelewele),
     Recipe(
         id: 7,
         name: "Fish Stew",
@@ -173,7 +182,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.fish_Stew,
         collection: false,
         favorite: false,
-        mealType: MealType.dinner),
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.fish_Stew),
     Recipe(
         id: 8,
         name: "Omo Tuo",
@@ -184,7 +194,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.omo_Tuo,
         collection: false,
         favorite: false,
-        mealType: MealType.dinner),
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.omo_Tuo),
     Recipe(
         id: 9,
         name: "BanKye (Agble) Krakro",
@@ -195,7 +206,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.bankye_kakro,
         collection: false,
         favorite: false,
-        mealType: MealType.snack),
+        mealType: MealType.snack,
+        videoLink: RecipeVideoUrls.bankye_kakro),
     Recipe(
         id: 10,
         name: "Nkatie Cake",
@@ -206,7 +218,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.nkatie_Cake,
         collection: false,
         favorite: false,
-        mealType: MealType.snack),
+        mealType: MealType.snack,
+        videoLink: RecipeVideoUrls.nkatie_Cake),
     Recipe(
         id: 11,
         name: "Adaakwa (Zowey)",
@@ -217,7 +230,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.adaakwa,
         collection: false,
         favorite: false,
-        mealType: MealType.snack),
+        mealType: MealType.snack,
+        videoLink: RecipeVideoUrls.adaakwa),
     Recipe(
         id: 12,
         name: "Fante Fante",
@@ -228,7 +242,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.fante_fante,
         collection: false,
         favorite: false,
-        mealType: MealType.dinner),
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.fante_fante),
     Recipe(
         id: 13,
         name: "Ga Kenkey",
@@ -239,7 +254,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.ga_kenkey,
         collection: false,
         favorite: false,
-        mealType: MealType.dinner),
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.ga_kenkey),
     Recipe(
         id: 14,
         name: "Fried Rice",
@@ -248,9 +264,10 @@ class DatabaseProvider {
         direction: RecipeDirections.friedRiceDir,
         ingredients: RecipeIngredients.friedRiceIngr,
         imageUrl: RecipeImgUrls.fried_Rice,
-        collection: false,
+        collection: true,
         favorite: false,
-        mealType: MealType.lunch),
+        mealType: MealType.lunch,
+        videoLink: RecipeVideoUrls.fried_Rice),
     Recipe(
         id: 15,
         name: "Jollof Rice",
@@ -259,9 +276,10 @@ class DatabaseProvider {
         direction: RecipeDirections.jollofRiceDir,
         ingredients: RecipeIngredients.jollofRiceIngr,
         imageUrl: RecipeImgUrls.jollof_Rice,
-        collection: false,
+        collection: true,
         favorite: false,
-        mealType: MealType.lunch),
+        mealType: MealType.lunch,
+        videoLink: RecipeVideoUrls.jollof_Rice),
     Recipe(
         id: 16,
         name: "Waakye",
@@ -272,7 +290,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.waakye,
         collection: false,
         favorite: false,
-        mealType: MealType.lunch),
+        mealType: MealType.lunch,
+        videoLink: RecipeVideoUrls.waakye),
     Recipe(
         id: 17,
         name: "Rice Water",
@@ -281,9 +300,10 @@ class DatabaseProvider {
         direction: RecipeDirections.riceWaterDir,
         ingredients: RecipeIngredients.riceWaterIngr,
         imageUrl: RecipeImgUrls.rice_water,
-        collection: false,
-        favorite: false,
-        mealType: MealType.breakfast),
+        collection: true,
+        favorite: true,
+        mealType: MealType.breakfast,
+        videoLink: RecipeVideoUrls.rice_water),
     Recipe(
         id: 18,
         name: "Tatale",
@@ -294,7 +314,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.tatale,
         collection: false,
         favorite: false,
-        mealType: MealType.snack),
+        mealType: MealType.snack,
+        videoLink: RecipeVideoUrls.tatale),
     Recipe(
         id: 19,
         name: "Nkate Nkwan",
@@ -305,7 +326,8 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.nkate_nkwan,
         collection: true,
         favorite: false,
-        mealType: MealType.dinner),
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.nkate_nkwan),
     Recipe(
         id: 20,
         name: "Banku",
@@ -314,9 +336,10 @@ class DatabaseProvider {
         direction: RecipeDirections.bankuDir,
         ingredients: RecipeIngredients.bankuIngr,
         imageUrl: RecipeImgUrls.banku,
-        collection: false,
-        favorite: false,
-        mealType: MealType.dinner),
+        collection: true,
+        favorite: true,
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.banku),
     Recipe(
         id: 21,
         name: "Mputomputo",
@@ -325,9 +348,10 @@ class DatabaseProvider {
         direction: RecipeDirections.mputomputoDir,
         ingredients: RecipeIngredients.mputomputoIngr,
         imageUrl: RecipeImgUrls.mputomputo,
-        collection: false,
+        collection: true,
         favorite: false,
-        mealType: MealType.lunch),
+        mealType: MealType.lunch,
+        videoLink: RecipeVideoUrls.mputomputo),
     Recipe(
         id: 22,
         name: "Kontomire Stew",
@@ -336,9 +360,10 @@ class DatabaseProvider {
         direction: RecipeDirections.kontomireStewDir,
         ingredients: RecipeIngredients.kontomireStewIngr,
         imageUrl: RecipeImgUrls.kontomire_stew,
-        collection: false,
-        favorite: false,
-        mealType: MealType.dinner)
+        collection: true,
+        favorite: true,
+        mealType: MealType.dinner,
+        videoLink: RecipeVideoUrls.kontomire_stew)
   ];
 
   static List<Day> days = [

@@ -3,6 +3,7 @@ import '../../main.dart';
 import '../../recipe_viewmodel.dart';
 import '../../util/util.dart';
 import '../widgets/manage_collection_recipe_card.dart';
+import 'directions_screen.dart';
 
 //Screen navigated to from Explore Screen
 //recipes can be added or removed from collection from here
@@ -61,6 +62,8 @@ class _CollectionManagementScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: ReciplanCustomColors.appBarColor,
+        foregroundColor: Colors.white,
         title: Text(widget.collectionId),
       ),
       body: ListView.builder(
@@ -88,7 +91,13 @@ class _CollectionManagementScreenState
                 showSnackBar(context, "${recipe.name} removed");
               },
               onDirectionPress: () {
-                //Todo: Implement Directions Screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DirectionsScreen(
+                            recipe: recipe,
+                          )),
+                );
               },
               title: recipe.name,
               description:

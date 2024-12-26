@@ -20,3 +20,7 @@ void showSnackBar(BuildContext context, String message) {
     ),
   );
 }
+
+class ReciplanCustomColors {
+  static const appBarColor = Color.fromARGB(255, 5, 91, 8);
+}

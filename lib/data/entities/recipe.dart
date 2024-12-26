@@ -15,39 +15,40 @@ class Recipe {
   final bool favorite;
   final int mealType;
   final bool userCreated;
+  final String videoLink;
 
-  Recipe({
-    required this.id,
-    required this.name,
-    required this.mins,
-    required this.numIngredients,
-    required this.direction,
-    required this.ingredients,
-    required this.imageUrl,
-    required this.collection,
-    required this.favorite,
-    required this.mealType,
-    this.userCreated = false,
-  });
+  Recipe(
+      {required this.id,
+      required this.name,
+      required this.mins,
+      required this.numIngredients,
+      required this.direction,
+      required this.ingredients,
+      required this.imageUrl,
+      required this.collection,
+      required this.favorite,
+      required this.mealType,
+      this.userCreated = false,
+      required this.videoLink});
 
   @override
   String toString() {
     return 'Recipe(name: $name, type: $mealType)\n';
   }
 
-  Recipe copyWith({
-    int? id,
-    String? name,
-    int? mins,
-    int? numIngredients,
-    String? direction,
-    String? ingredients,
-    String? imageUrl,
-    bool? collection,
-    bool? favorite,
-    int? mealType,
-    bool? userCreated,
-  }) {
+  Recipe copyWith(
+      {int? id,
+      String? name,
+      int? mins,
+      int? numIngredients,
+      String? direction,
+      String? ingredients,
+      String? imageUrl,
+      bool? collection,
+      bool? favorite,
+      int? mealType,
+      bool? userCreated,
+      String? videoLink}) {
     return Recipe(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -60,6 +61,7 @@ class Recipe {
       favorite: favorite ?? this.favorite,
       mealType: mealType ?? this.mealType,
       userCreated: userCreated ?? this.userCreated,
+      videoLink: videoLink ?? this.videoLink,
     );
   }
 }

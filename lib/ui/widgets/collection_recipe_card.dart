@@ -44,15 +44,22 @@ class CollectionRecipeCard extends StatelessWidget {
                 right: 8,
                 child: Row(
                   children: [
-                    IconButton(
-                      iconSize: 32, // Increase button hit area
-                      padding: const EdgeInsets.all(8),
-                      color: isFavorite ? Colors.red : Colors.grey,
-                      icon: const Icon(
-                        Icons.favorite,
-                        size: 32, // Increase icon visual size
+                    AnimatedScale(
+                      scale: isFavorite ? 1.2 : 1.0,
+                      duration: const Duration(milliseconds: 400),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        child: IconButton(
+                          iconSize: 32,
+                          padding: const EdgeInsets.all(8),
+                          color: isFavorite ? Colors.red : Colors.grey,
+                          icon: const Icon(
+                            Icons.favorite,
+                            size: 32,
+                          ),
+                          onPressed: onFavoriteClicked,
+                        ),
                       ),
-                      onPressed: onFavoriteClicked,
                     ),
                   ],
                 ),

@@ -98,7 +98,7 @@ class _$ReciplanDatabase extends ReciplanDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `recipe_table` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `mins` INTEGER NOT NULL, `numIngredients` INTEGER NOT NULL, `direction` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `collection` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `mealType` INTEGER NOT NULL, `userCreated` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `recipe_table` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `mins` INTEGER NOT NULL, `numIngredients` INTEGER NOT NULL, `direction` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `collection` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `mealType` INTEGER NOT NULL, `userCreated` INTEGER NOT NULL, `videoLink` TEXT NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `day_table` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `breakfast` INTEGER NOT NULL, `lunch` INTEGER NOT NULL, `dinner` INTEGER NOT NULL, FOREIGN KEY (`breakfast`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY (`lunch`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY (`dinner`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
@@ -144,7 +144,8 @@ class _$RecipeDao extends RecipeDao {
                   'collection': item.collection ? 1 : 0,
                   'favorite': item.favorite ? 1 : 0,
                   'mealType': item.mealType,
-                  'userCreated': item.userCreated ? 1 : 0
+                  'userCreated': item.userCreated ? 1 : 0,
+                  'videoLink': item.videoLink
                 },
             changeListener),
         _recipeUpdateAdapter = UpdateAdapter(
@@ -162,7 +163,8 @@ class _$RecipeDao extends RecipeDao {
                   'collection': item.collection ? 1 : 0,
                   'favorite': item.favorite ? 1 : 0,
                   'mealType': item.mealType,
-                  'userCreated': item.userCreated ? 1 : 0
+                  'userCreated': item.userCreated ? 1 : 0,
+                  'videoLink': item.videoLink
                 },
             changeListener),
         _recipeDeletionAdapter = DeletionAdapter(
@@ -180,7 +182,8 @@ class _$RecipeDao extends RecipeDao {
                   'collection': item.collection ? 1 : 0,
                   'favorite': item.favorite ? 1 : 0,
                   'mealType': item.mealType,
-                  'userCreated': item.userCreated ? 1 : 0
+                  'userCreated': item.userCreated ? 1 : 0,
+                  'videoLink': item.videoLink
                 },
             changeListener);
 
@@ -254,7 +257,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         arguments: [recipeId]);
   }
 
@@ -273,7 +277,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0));
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String));
   }
 
   @override
@@ -291,7 +296,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -311,7 +317,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -331,7 +338,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -351,7 +359,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -371,7 +380,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -391,7 +401,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -411,7 +422,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -431,7 +443,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -451,7 +464,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -471,7 +485,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         queryableName: 'recipe_table',
         isView: false);
   }
@@ -497,7 +512,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         arguments: [...dayIDs]);
   }
 
@@ -520,7 +536,8 @@ class _$RecipeDao extends RecipeDao {
             collection: (row['collection'] as int) != 0,
             favorite: (row['favorite'] as int) != 0,
             mealType: row['mealType'] as int,
-            userCreated: (row['userCreated'] as int) != 0),
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
         arguments: [firstId, secondId, thirdId],
         queryableName: 'recipe_table',
         isView: false);
@@ -591,7 +608,8 @@ class _$DayDao extends DayDao {
                   'collection': item.collection ? 1 : 0,
                   'favorite': item.favorite ? 1 : 0,
                   'mealType': item.mealType,
-                  'userCreated': item.userCreated ? 1 : 0
+                  'userCreated': item.userCreated ? 1 : 0,
+                  'videoLink': item.videoLink
                 },
             changeListener);
 
@@ -672,7 +690,7 @@ class _$DayDao extends DayDao {
   Future<List<Recipe>> getRecipesForDay(int dayId) async {
     return _queryAdapter.queryList(
         'SELECT r.* FROM recipe_table r     INNER JOIN day_table d ON        r.id = d.breakfast OR        r.id = d.lunch OR        r.id = d.dinner     WHERE d.id = ?1     ORDER BY CASE r.id        WHEN d.breakfast THEN 1       WHEN d.lunch THEN 2       WHEN d.dinner THEN 3     END',
-        mapper: (Map<String, Object?> row) => Recipe(id: row['id'] as int, name: row['name'] as String, mins: row['mins'] as int, numIngredients: row['numIngredients'] as int, direction: row['direction'] as String, ingredients: row['ingredients'] as String, imageUrl: row['imageUrl'] as String, collection: (row['collection'] as int) != 0, favorite: (row['favorite'] as int) != 0, mealType: row['mealType'] as int, userCreated: (row['userCreated'] as int) != 0),
+        mapper: (Map<String, Object?> row) => Recipe(id: row['id'] as int, name: row['name'] as String, mins: row['mins'] as int, numIngredients: row['numIngredients'] as int, direction: row['direction'] as String, ingredients: row['ingredients'] as String, imageUrl: row['imageUrl'] as String, collection: (row['collection'] as int) != 0, favorite: (row['favorite'] as int) != 0, mealType: row['mealType'] as int, userCreated: (row['userCreated'] as int) != 0, videoLink: row['videoLink'] as String),
         arguments: [dayId]);
   }
 

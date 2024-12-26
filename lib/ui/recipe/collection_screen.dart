@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reciplan3/ui/recipe/directions_screen.dart';
 import 'package:reciplan3/util/util.dart';
 
 import '../../main.dart';
@@ -51,7 +52,13 @@ class _CollectionManagementScreenState extends State<CollectionScreen> {
             final recipe = _viewModel.collections[index];
             return CollectionRecipeCard(
               onDirectionPress: () {
-                //Todo: Implement Direction screen Later
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DirectionsScreen(
+                            recipe: recipe,
+                          )),
+                );
               },
               onFavoriteClicked: () {
                 final updatedRecipe =
