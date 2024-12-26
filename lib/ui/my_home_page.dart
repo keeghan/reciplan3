@@ -4,7 +4,7 @@ import 'package:reciplan3/util/util.dart';
 import 'add/add_page.dart';
 import 'plan/plan_page.dart';
 import 'recipe_page.dart';
-import 'settings_page.dart';
+import 'settings_screen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -43,7 +43,8 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
                 );
               },
               icon: Icon(Icons.settings))
