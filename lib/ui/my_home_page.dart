@@ -3,7 +3,7 @@ import 'package:reciplan3/util/util.dart';
 
 import 'add/add_page.dart';
 import 'plan/plan_page.dart';
-import 'recipe_page.dart';
+import 'recipe/recipe_page.dart';
 import 'settings_screen.dart';
 
 class MyHomePage extends StatefulWidget {

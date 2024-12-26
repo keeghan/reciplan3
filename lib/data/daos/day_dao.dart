@@ -43,8 +43,24 @@ abstract class DayDao {
       WHEN d.dinner THEN 3
     END
   ''')
-  Future<List<Recipe>> getRecipesForDay(int dayId);
+  Stream<List<Recipe>> getRecipesForDay(int dayId);
 
   @Insert(onConflict: OnConflictStrategy.replace)
   Future<void> insertDays(List<Day> days);
+
+  //Todo: Collapse all queries into one
+  // @Query('''
+  //   SELECT r.* FROM recipe_table r
+  //   INNER JOIN day_table d ON 
+  //     r.id = d.breakfast OR 
+  //     r.id = d.lunch OR 
+  //     r.id = d.dinner
+  //   WHERE d.id = 0
+  //   ORDER BY CASE r.id 
+  //     WHEN d.breakfast THEN 1
+  //     WHEN d.lunch THEN 2
+  //     WHEN d.dinner THEN 3
+  //   END
+  // ''')
+  // Future<List<Recipe>> getSundayRecipes();
 }

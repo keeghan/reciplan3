@@ -17,9 +17,11 @@ The codebase is simple to facilitate easy understanding by beginners.
 
 https://github.com/keeghan/MovieSearch/assets/40280581/fb75ae08-1c01-462a-ba55-b79cf039d156
 
+- Flutter version currently not complete with all features
+
 ## Screenshots
 
-<img src = "screenshots/explore_screen.png" width = "220" height = "471"/> &nbsp; <img src = "screenshots/favorite_screen.png" width = "220" height = "471"/> &nbsp; <img src = "screenshots/directions_screen.png" width = "220" height = "471"/> &nbsp; <img src = "screenshots/settings_screen.png" width = "220" height = "471"/> 
+<img src = "screenshots/explore_screen.png" width = "220" height = "471"/> &nbsp; <img src = "screenshots/favorite_screen.png" width = "220" height = "471"/> &nbsp; <img src = "screenshots/directions_screen.png" width = "220" height = "471"/> &nbsp; <img src = "screenshots/settings_screen.png" width = "220" height = "471"/>
 
 ## Tech Stack
 
@@ -35,7 +37,6 @@ https://github.com/keeghan/MovieSearch/assets/40280581/fb75ae08-1c01-462a-ba55-b
 - [file_picker](https://pub.dev/packages/file_picker) for picking files, replacing any file selection libraries like uCrop.
 - [permission_handler](https://pub.dev/packages/permission_handler) for handling permissions.
 - [path_provider](https://pub.dev/packages/path_provider) for accessing commonly used locations on the device’s filesystem.
-
 
 ## Features
 
@@ -57,5 +58,3 @@ Additionally, ensure that Android Studio is configured with the Flutter and Dart
 ## License
 
 This project is currently licensed under the Creative Commons Legal Code : CC0 1.0 Universal
-
-

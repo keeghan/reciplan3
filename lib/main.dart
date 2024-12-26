@@ -4,26 +4,29 @@ import 'package:provider/provider.dart';
 import 'package:reciplan3/data/daos/recipe_dao.dart';
 import 'package:reciplan3/data/db/database_provider.dart';
 import 'package:reciplan3/data/db/reciplan_database.dart';
+import 'package:reciplan3/data/repositories/day_repository.dart';
 
 import 'data/daos/day_dao.dart';
 import 'data/repositories/recipe_repository.dart';
+import 'plan_viewmodel.dart';
 import 'recipe_viewmodel.dart';
 import 'ui/my_home_page.dart';
 import 'util/theme_provider.dart';
-import 'util/util.dart';
 
+//Inject Singleton database,DAOs,Repositories and ViewModels
 final locator = GetIt.instance;
 
 Future<void> setupLocator() async {
-  locator.registerSingletonAsync<ReciplanDatabase>(
-      () => DatabaseProvider.database);
+  locator.registerSingletonAsync<ReciplanDatabase>(() => DatabaseProvider.database);
   locator.registerSingletonAsync<RecipeDao>(() => DatabaseProvider.recipeDao);
   locator.registerSingletonAsync<DayDao>(() => DatabaseProvider.dayDao);
+
   await locator.allReady();
-  locator.registerSingleton<RecipeRepository>(
-      RecipeRepository(locator<RecipeDao>()));
-  locator.registerFactory<RecipeViewModel>(
-      () => RecipeViewModel(locator<RecipeRepository>()));
+  locator.registerSingleton<RecipeRepository>(RecipeRepository(locator<RecipeDao>()));
+  locator.registerSingleton<DayRepository>(DayRepository(locator<DayDao>()));
+
+  locator.registerFactory<RecipeViewModel>(() => RecipeViewModel(locator<RecipeRepository>()));
+  locator.registerFactory<PlanViewModel>(() =>PlanViewModel(locator<RecipeRepository>(), locator<DayRepository>()));
 }
 
 void main() async {

@@ -2,6 +2,7 @@ import '../../util/util.dart';
 import '../daos/day_dao.dart';
 import '../entities/day.dart';
 import '../entities/recipe.dart';
+import 'package:async/async.dart';
 
 class DayRepository {
   final DayDao _dayDao;
@@ -39,13 +40,18 @@ class DayRepository {
     }
   }
 
-  // Add a new recipe
-  Future<void> addRecipe(Recipe recipe) async {
-    await _dayDao.insertRecipe(recipe);
-  }
+  //Combine all days into one stream
 
-  // Get all recipes for a specific day
-  Future<List<Recipe>> getDayRecipes(int dayId) async {
-    return await _dayDao.getRecipesForDay(dayId);
-  }
+ Stream<Map<int, List<Recipe>>> getWeekRecipes() async* {
+  final futures = List.generate(7, (dayId) {
+    return _dayDao.getRecipesForDay(dayId + 1).first.then((recipes) {
+      return MapEntry(dayId + 1, recipes);
+    });
+  });
+
+  final entries = await Future.wait(futures);
+  final weekRecipes = Map<int, List<Recipe>>.fromEntries(entries);
+
+  yield weekRecipes;
+}
 }

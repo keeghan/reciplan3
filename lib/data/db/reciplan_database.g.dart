@@ -583,7 +583,7 @@ class _$DayDao extends DayDao {
   _$DayDao(
     this.database,
     this.changeListener,
-  )   : _queryAdapter = QueryAdapter(database),
+  )   : _queryAdapter = QueryAdapter(database, changeListener),
         _dayInsertionAdapter = InsertionAdapter(
             database,
             'day_table',
@@ -687,11 +687,25 @@ class _$DayDao extends DayDao {
   }
 
   @override
-  Future<List<Recipe>> getRecipesForDay(int dayId) async {
-    return _queryAdapter.queryList(
+  Stream<List<Recipe>> getRecipesForDay(int dayId) {
+    return _queryAdapter.queryListStream(
         'SELECT r.* FROM recipe_table r     INNER JOIN day_table d ON        r.id = d.breakfast OR        r.id = d.lunch OR        r.id = d.dinner     WHERE d.id = ?1     ORDER BY CASE r.id        WHEN d.breakfast THEN 1       WHEN d.lunch THEN 2       WHEN d.dinner THEN 3     END',
-        mapper: (Map<String, Object?> row) => Recipe(id: row['id'] as int, name: row['name'] as String, mins: row['mins'] as int, numIngredients: row['numIngredients'] as int, direction: row['direction'] as String, ingredients: row['ingredients'] as String, imageUrl: row['imageUrl'] as String, collection: (row['collection'] as int) != 0, favorite: (row['favorite'] as int) != 0, mealType: row['mealType'] as int, userCreated: (row['userCreated'] as int) != 0, videoLink: row['videoLink'] as String),
-        arguments: [dayId]);
+        mapper: (Map<String, Object?> row) => Recipe(
+            id: row['id'] as int,
+            name: row['name'] as String,
+            mins: row['mins'] as int,
+            numIngredients: row['numIngredients'] as int,
+            direction: row['direction'] as String,
+            ingredients: row['ingredients'] as String,
+            imageUrl: row['imageUrl'] as String,
+            collection: (row['collection'] as int) != 0,
+            favorite: (row['favorite'] as int) != 0,
+            mealType: row['mealType'] as int,
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String),
+        arguments: [dayId],
+        queryableName: 'recipe_table',
+        isView: false);
   }
 
   @override

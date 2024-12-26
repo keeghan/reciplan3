@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'recipe/collection_screen.dart';
-import 'recipe/explore_screen.dart';
-import 'recipe/favorite_screen.dart';
+import 'collection_screen.dart';
+import 'explore_screen.dart';
+import 'favorite_screen.dart';
 
 class RecipePage extends StatefulWidget {
   const RecipePage({super.key});
