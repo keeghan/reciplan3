@@ -14,6 +14,7 @@ class RecipeViewModel extends ChangeNotifier {
   List<Recipe> _favoriteRecipes = [];
   List<Recipe> _recipeForDay = [];
   List<Recipe> _collections = [];
+  List<Recipe> _favorites = [];
   bool _isLoading = false;
   String? _error;
 
@@ -24,6 +25,8 @@ class RecipeViewModel extends ChangeNotifier {
   List<Recipe> get favoriteRecipes => _favoriteRecipes;
   List<Recipe> get recipeForDay => _recipeForDay;
   List<Recipe> get collections => _collections;
+  List<Recipe> get favorites => _favorites;
+
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -60,6 +63,7 @@ class RecipeViewModel extends ChangeNotifier {
           stream = await _recipeRepository.getDinners();
         case RecipeType.snack:
           stream = await _recipeRepository.getSnacks();
+        //Todo: Remove favorites
         case RecipeType.favorite:
           stream = await _recipeRepository.getFavoriteRecipes();
       }
@@ -115,6 +119,25 @@ class RecipeViewModel extends ChangeNotifier {
       stream.listen(
         (collections) {
           _collections = collections;
+          notifyListeners();
+        },
+        onError: (e) {
+          handleError(e);
+        },
+      );
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
+  Future<void> loadFavoriteRecipes() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      final stream = await _recipeRepository.getFavoriteRecipes();
+      stream.listen(
+        (favorites) {
+          _favorites = favorites;
           notifyListeners();
         },
         onError: (e) {
