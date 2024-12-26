@@ -29,6 +29,9 @@ abstract class DayDao {
   @insert
   Future<void> insertRecipe(Recipe recipe);
 
+  @update
+  Future<void> updateDay(Day day);
+
   //Other methods
   @Query('''
     SELECT r.* FROM recipe_table r

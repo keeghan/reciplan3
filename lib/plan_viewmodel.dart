@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:reciplan3/data/repositories/day_repository.dart';
 import '../../data/repositories/recipe_repository.dart';
 import '../../data/entities/recipe.dart';
+import 'data/entities/day.dart';
 
 //Repository for PlanPage and ManagePlanScreen
 class PlanViewModel extends ChangeNotifier {
@@ -25,6 +26,7 @@ class PlanViewModel extends ChangeNotifier {
     return _weekRecipesStream?.asBroadcastStream();
   }
 
+  //load all the streams of recipes for the week
   void loadWeekRecipes() {
     _isLoading = true;
     notifyListeners();
@@ -38,6 +40,21 @@ class PlanViewModel extends ChangeNotifier {
       _isLoading = true;
       _error = null;
       await _recipeRepository.updateRecipe(recipe);
+    } catch (e) {
+      _error = 'Failed to update recipe: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //Method to remove a recipe from a day
+  Future<void> clearRecipeInDay(int dayId, int mealType) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      //use mealType recipeId to set recipe as empty (0,1,2)
+      await _dayRepository.updateDayMeal(dayId, mealType, mealType);
     } catch (e) {
       _error = 'Failed to update recipe: $e';
     } finally {

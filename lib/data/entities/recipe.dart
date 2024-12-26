@@ -2,7 +2,7 @@ import 'package:floor/floor.dart';
 
 @Entity(tableName: 'recipe_table')
 class Recipe {
-  @primaryKey
+  @PrimaryKey(autoGenerate: true)
   final int id;
 
   final String name;

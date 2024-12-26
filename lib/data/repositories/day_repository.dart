@@ -2,7 +2,6 @@ import '../../util/util.dart';
 import '../daos/day_dao.dart';
 import '../entities/day.dart';
 import '../entities/recipe.dart';
-import 'package:async/async.dart';
 
 class DayRepository {
   final DayDao _dayDao;
@@ -23,7 +22,12 @@ class DayRepository {
     await _dayDao.insertDay(day);
   }
 
-  // Update meal slots
+  // Update a day, especially for the plan
+  Future<void> updateRecipe(Day day) async {
+    await _dayDao.updateDay(day);
+  }
+
+  // Update day to set new recipe or remove one
   Future<void> updateDayMeal(int dayId, int recipeId, int mealType) async {
     switch (mealType) {
       case MealType.breakfast:
@@ -42,16 +46,16 @@ class DayRepository {
 
   //Combine all days into one stream
 
- Stream<Map<int, List<Recipe>>> getWeekRecipes() async* {
-  final futures = List.generate(7, (dayId) {
-    return _dayDao.getRecipesForDay(dayId + 1).first.then((recipes) {
-      return MapEntry(dayId + 1, recipes);
+  Stream<Map<int, List<Recipe>>> getWeekRecipes() async* {
+    final futures = List.generate(7, (dayId) {
+      return _dayDao.getRecipesForDay(dayId + 1).first.then((recipes) {
+        return MapEntry(dayId + 1, recipes);
+      });
     });
-  });
 
-  final entries = await Future.wait(futures);
-  final weekRecipes = Map<int, List<Recipe>>.fromEntries(entries);
+    final entries = await Future.wait(futures);
+    final weekRecipes = Map<int, List<Recipe>>.fromEntries(entries);
 
-  yield weekRecipes;
-}
+    yield weekRecipes;
+  }
 }

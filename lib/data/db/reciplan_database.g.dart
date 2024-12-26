@@ -98,7 +98,7 @@ class _$ReciplanDatabase extends ReciplanDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `recipe_table` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `mins` INTEGER NOT NULL, `numIngredients` INTEGER NOT NULL, `direction` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `collection` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `mealType` INTEGER NOT NULL, `userCreated` INTEGER NOT NULL, `videoLink` TEXT NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `recipe_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `mins` INTEGER NOT NULL, `numIngredients` INTEGER NOT NULL, `direction` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `collection` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `mealType` INTEGER NOT NULL, `userCreated` INTEGER NOT NULL, `videoLink` TEXT NOT NULL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `day_table` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `breakfast` INTEGER NOT NULL, `lunch` INTEGER NOT NULL, `dinner` INTEGER NOT NULL, FOREIGN KEY (`breakfast`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY (`lunch`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY (`dinner`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
@@ -611,7 +611,18 @@ class _$DayDao extends DayDao {
                   'userCreated': item.userCreated ? 1 : 0,
                   'videoLink': item.videoLink
                 },
-            changeListener);
+            changeListener),
+        _dayUpdateAdapter = UpdateAdapter(
+            database,
+            'day_table',
+            ['id'],
+            (Day item) => <String, Object?>{
+                  'id': item.id,
+                  'name': item.name,
+                  'breakfast': item.breakfast,
+                  'lunch': item.lunch,
+                  'dinner': item.dinner
+                });
 
   final sqflite.DatabaseExecutor database;
 
@@ -622,6 +633,8 @@ class _$DayDao extends DayDao {
   final InsertionAdapter<Day> _dayInsertionAdapter;
 
   final InsertionAdapter<Recipe> _recipeInsertionAdapter;
+
+  final UpdateAdapter<Day> _dayUpdateAdapter;
 
   @override
   Future<Day?> getDay(int dayId) async {
@@ -721,5 +734,10 @@ class _$DayDao extends DayDao {
   @override
   Future<void> insertDays(List<Day> days) async {
     await _dayInsertionAdapter.insertList(days, OnConflictStrategy.replace);
+  }
+
+  @override
+  Future<void> updateDay(Day day) async {
+    await _dayUpdateAdapter.update(day, OnConflictStrategy.abort);
   }
 }
