@@ -13,6 +13,7 @@ class RecipeViewModel extends ChangeNotifier {
   List<Recipe> _recipes = [];
   List<Recipe> _favoriteRecipes = [];
   List<Recipe> _recipeForDay = [];
+  List<Recipe> _collections = [];
   bool _isLoading = false;
   String? _error;
 
@@ -22,6 +23,7 @@ class RecipeViewModel extends ChangeNotifier {
   List<Recipe> get recipes => _recipes;
   List<Recipe> get favoriteRecipes => _favoriteRecipes;
   List<Recipe> get recipeForDay => _recipeForDay;
+  List<Recipe> get collections => _collections;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -105,12 +107,29 @@ class RecipeViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> loadCollectionRecipes() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      final stream = await _recipeRepository.getCollectionRecipes();
+      stream.listen(
+        (collections) {
+          _collections = collections;
+          notifyListeners();
+        },
+        onError: (e) {
+          handleError(e);
+        },
+      );
+    } catch (e) {
+      handleError(e);
+    }
+  }
+
   Future<void> createRecipe(Recipe recipe) async {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
-
       await _recipeRepository.createRecipe(recipe);
     } catch (e) {
       _error = 'Failed to create recipe: $e';
@@ -125,7 +144,6 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
       await _recipeRepository.updateRecipe(recipe);
     } catch (e) {
       _error = 'Failed to update recipe: $e';
@@ -140,7 +158,6 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      notifyListeners();
       await _recipeRepository.deleteRecipeById(id);
     } catch (e) {
       _error = 'Failed to delete recipe: $e';

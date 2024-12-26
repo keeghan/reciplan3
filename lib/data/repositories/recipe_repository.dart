@@ -1,4 +1,3 @@
-
 import '../daos/recipe_dao.dart';
 import '../entities/recipe.dart';
 
@@ -37,6 +36,11 @@ class RecipeRepository {
     return _recipeDao.getFavoriteRecipes();
   }
 
+  // Get  collection recipes
+  Future<Stream<List<Recipe>>> getCollectionRecipes() async {
+    return _recipeDao.getAllCollectionsRecipes();
+  }
+
   // Get breakfast collection recipes
   Future<Stream<List<Recipe>>> getBreakfastCollectionRecipes() async {
     return _recipeDao.getBreakfastCollectionRecipes();
@@ -57,7 +61,6 @@ class RecipeRepository {
   //   return _recipeDao.getSnackRecipes();
   // }
 
-
   // Get breakfast collection recipes
   Future<Stream<List<Recipe>>> getBreakfasks() async {
     return _recipeDao.getBreakfastRecipes();
@@ -77,9 +80,6 @@ class RecipeRepository {
   Future<Stream<List<Recipe>>> getSnacks() async {
     return _recipeDao.getSnackRecipes();
   }
-
-
-
 
   // Get recipes for active days
   Future<List<Recipe>> getActiveDayRecipes(List<int> dayIds) async {

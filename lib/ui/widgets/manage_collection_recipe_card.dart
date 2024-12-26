@@ -2,20 +2,24 @@ import 'package:flutter/material.dart';
 
 import 'network_image_with_placeholder.dart';
 
-class RecipeCard extends StatelessWidget {
+//Widget to be used in collectionManagementScreen to add or
+//remove recipes from Collection
+class ManageCollectionRecipeCard extends StatelessWidget {
   final String title;
   final String description;
   final String imageUrl;
   final VoidCallback onCheckPress;
   final VoidCallback onRemovePress;
+  final VoidCallback onDirectionPress;
 
-  const RecipeCard({
+  const ManageCollectionRecipeCard({
     super.key,
     required this.title,
     required this.description,
     required this.imageUrl,
     required this.onCheckPress,
     required this.onRemovePress,
+    required this.onDirectionPress,
   });
 
   @override
@@ -92,7 +96,7 @@ class RecipeCard extends StatelessWidget {
               alignment: MainAxisAlignment.start,
               children: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: onDirectionPress,
                   child: const Text('Directions'),
                 ),
               ],

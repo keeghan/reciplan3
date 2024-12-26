@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+//Image Loader with caching
 class NetworkImageWithPlaceholder extends StatelessWidget {
   final String imageUrl;
   final double height;

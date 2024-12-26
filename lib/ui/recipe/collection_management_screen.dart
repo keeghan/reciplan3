@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
-import '../widgets/recipe_card.dart';
+import '../../util/util.dart';
+import '../widgets/manage_collection_recipe_card.dart';
 
+//Screen navigated to from Explore Screen
+//recipes can be added or removed from collection from here
 class CollectionManagementScreen extends StatefulWidget {
   final String collectionId;
 
@@ -64,7 +67,7 @@ class _CollectionManagementScreenState
           itemCount: _viewModel.recipes.length,
           itemBuilder: (context, index) {
             final recipe = _viewModel.recipes[index];
-            return RecipeCard(
+            return ManageCollectionRecipeCard(
               onCheckPress: () {
                 if (recipe.collection) {
                   showSnackBar(context, "Recipe already in collection");
@@ -84,6 +87,9 @@ class _CollectionManagementScreenState
                 _viewModel.updateRecipe(updatedRecipe);
                 showSnackBar(context, "${recipe.name} removed");
               },
+              onDirectionPress: () {
+                //Todo: Implement Directions Screen
+              },
               title: recipe.name,
               description:
                   '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
@@ -92,14 +98,4 @@ class _CollectionManagementScreenState
           }),
     );
   }
-}
-
-void showSnackBar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 2),
-      behavior: SnackBarBehavior.floating,
-    ),
-  );
 }
