@@ -9,7 +9,8 @@ class PlanDayItem extends StatelessWidget {
   final int dayId;
   final List<Recipe> dayRecipes;
   final VoidCallback onEditDayPlanPressed;
-  final VoidCallback onRecipeSwiped;
+  //pass recipeId and mealtype up to planPage to be remove from day
+  final Function(int recipeId, int mealType) onRecipeSwiped;
 
   const PlanDayItem({
     super.key,
@@ -56,17 +57,22 @@ class PlanDayItem extends StatelessWidget {
           //recipes
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                final recipe = dayRecipes[index];
-                return PlanRecipeItem(
-                    recipeName: recipe.name,
-                    mealType: recipe.mealType,
-                    imageUrl: recipe.imageUrl,
-                    recipeId: recipe.id,
-                    onRecipeSwiped: onRecipeSwiped);
-              }),
+            shrinkWrap: true,
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              final recipe = dayRecipes[index];
+              return KeyedSubtree(
+                child: PlanRecipeItem(
+                  recipeName: recipe.name,
+                  mealType: recipe.mealType,
+                  imageUrl: recipe.imageUrl,
+                  recipeId: recipe.id,
+                  onRecipeSwiped: () =>
+                      onRecipeSwiped(recipe.id, recipe.mealType),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

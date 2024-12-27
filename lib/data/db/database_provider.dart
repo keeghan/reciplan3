@@ -44,7 +44,6 @@ class DatabaseProvider {
                 recipe.videoLink
               ],
             );
-            print('====${recipe.id}====');
           }
 
           // Then insert all days
@@ -53,7 +52,6 @@ class DatabaseProvider {
               'INSERT INTO day_table (id, name, breakfast, lunch, dinner) VALUES (?, ?, ?, ?, ?)',
               [day.id, day.name, day.breakfast, day.lunch, day.dinner],
             );
-            print('====${day.name}====');
           }
         },
       )).build();
@@ -370,9 +368,9 @@ class DatabaseProvider {
   Day(id: DayIds.sunday, name: "Sunday", breakfast: 3, lunch: 14, dinner: 22),
   Day(id: DayIds.monday, name: "Monday", breakfast: 0, lunch: 1, dinner: 2),
   Day(id: DayIds.tuesday, name: "Tuesday", breakfast: 0, lunch: 1, dinner: 2),
-  Day(id: DayIds.wednesday, name: "Wednesday", breakfast: 0, lunch: 1, dinner: 2),
-  Day(id: DayIds.thursday, name: "Thursday", breakfast: 0, lunch: 1, dinner: 2),
-  Day(id: DayIds.friday, name: "Friday", breakfast: 0, lunch: 14, dinner: 2),
+  Day(id: DayIds.wednesday, name: "Wednesday", breakfast: 17, lunch: 1, dinner: 20),
+  Day(id: DayIds.thursday, name: "Thursday", breakfast: 0, lunch: 21, dinner: 2),
+  Day(id: DayIds.friday, name: "Friday", breakfast: 3, lunch: 14, dinner: 22),
   Day(id: DayIds.saturday, name: "Saturday", breakfast: 0, lunch: 1, dinner: 2),
 ];
 }

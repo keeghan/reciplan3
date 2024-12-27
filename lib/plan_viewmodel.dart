@@ -16,22 +16,9 @@ class PlanViewModel extends ChangeNotifier {
 
   PlanViewModel(this._recipeRepository, this._dayRepository);
 
-  Stream<Map<int, List<Recipe>>>? _weekRecipesStream;
-  Map<int, List<Recipe>>? _weekRecipes;
-
-  Map<int, List<Recipe>>? get weekRecipes => _weekRecipes;
-
-  // Convert the stream to a broadcast stream to allow multiple listeners
-  Stream<Map<int, List<Recipe>>>? get weekRecipesStream {
-    return _weekRecipesStream?.asBroadcastStream();
-  }
-
-  //load all the streams of recipes for the week
-  void loadWeekRecipes() {
-    _isLoading = true;
-    notifyListeners();
-    //Todo: implement error check (beware of stream already listen to error)
-    _weekRecipesStream = _dayRepository.getWeekRecipes();
+//Stream for plan_page
+  Stream<Map<int, List<Recipe>>> get weekRecipesStream {
+    return _dayRepository.getWeekRecipes().asBroadcastStream();
   }
 
   // Update recipe
@@ -53,8 +40,9 @@ class PlanViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       _error = null;
-      //use mealType recipeId to set recipe as empty (0,1,2)
+      //use mealType as recipeId to set recipe as empty (0,1,2)
       await _dayRepository.updateDayMeal(dayId, mealType, mealType);
+      notifyListeners();
     } catch (e) {
       _error = 'Failed to update recipe: $e';
     } finally {
@@ -63,7 +51,6 @@ class PlanViewModel extends ChangeNotifier {
     }
   }
 
-  // Maintain existing helper methods
   void handleError(dynamic e) {
     _isLoading = false;
     _error = 'Failed to load recipes: $e';

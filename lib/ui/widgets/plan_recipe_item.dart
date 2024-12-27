@@ -23,15 +23,14 @@ class PlanRecipeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      direction: DismissDirection.none,
-      key: Key(recipeId.toString()),
+      direction: DismissDirection.horizontal,
+      key: ValueKey('dismissible_${recipeId}_$mealType'),
       onDismissed: (direction) {
-        //Remove recipe from day when swiped
         onRecipeSwiped();
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 2, horizontal: 0),
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.fromLTRB(10, 4, 4, 4),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -53,7 +52,7 @@ class PlanRecipeItem extends StatelessWidget {
                   Text(
                     recipeName,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

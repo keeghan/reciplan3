@@ -20,11 +20,6 @@ class _PlanPageState extends State<PlanPage> {
   void initState() {
     super.initState();
     _viewModel = locator.get<PlanViewModel>();
-    _loadRecipes();
-  }
-
-  void _loadRecipes() {
-    _viewModel.loadWeekRecipes();
   }
 
   @override
@@ -58,14 +53,16 @@ class _PlanPageState extends State<PlanPage> {
                   dayRecipes: recipes!,
                   onEditDayPlanPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ManageDayScreen(dayId: dayId)));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ManageDayScreen(dayId: dayId),
+                      ),
+                    );
                   },
-                  onRecipeSwiped: () {
-                    //Todo: implement swipe to remove recipe from day
-                    //  _viewModel.clearRecipeInDay(dayId, mealType)
+                  onRecipeSwiped: (int recipeId, int mealType) {
+                    _viewModel.clearRecipeInDay(dayId, mealType);
+                    // setState(() {print("--------------------set in motion----------------------------");});
+                   // Todo: Rebulid only correct planDayItem
                   },
                 );
               },
