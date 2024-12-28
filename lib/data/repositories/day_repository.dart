@@ -28,7 +28,7 @@ class DayRepository {
   }
 
   // Update day to set new recipe or remove one
-  Future<void> updateDayMeal(int dayId, int recipeId, int mealType) async {
+  Future<void> updateDayMeal(int dayId, int mealType, int recipeId) async {
     switch (mealType) {
       case MealType.breakfast:
         await _dayDao.updateBreakfast(dayId, recipeId);

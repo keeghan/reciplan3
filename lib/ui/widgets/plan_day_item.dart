@@ -9,15 +9,12 @@ class PlanDayItem extends StatelessWidget {
   final int dayId;
   final List<Recipe> dayRecipes;
   final VoidCallback onEditDayPlanPressed;
-  //pass recipeId and mealtype up to planPage to be remove from day
-  final Function(int recipeId, int mealType) onRecipeSwiped;
 
   const PlanDayItem({
     super.key,
     required this.dayRecipes,
     required this.onEditDayPlanPressed,
     required this.dayId,
-    required this.onRecipeSwiped,
   });
 
   @override
@@ -67,8 +64,6 @@ class PlanDayItem extends StatelessWidget {
                   mealType: recipe.mealType,
                   imageUrl: recipe.imageUrl,
                   recipeId: recipe.id,
-                  onRecipeSwiped: () =>
-                      onRecipeSwiped(recipe.id, recipe.mealType),
                 ),
               );
             },
@@ -79,24 +74,3 @@ class PlanDayItem extends StatelessWidget {
   }
 }
 
-//match day with id
-String getDayName(int dayId) {
-  switch (dayId) {
-    case DayIds.sunday:
-      return 'Sunday';
-    case DayIds.monday:
-      return 'Monday';
-    case DayIds.tuesday:
-      return 'Tuesday';
-    case DayIds.wednesday:
-      return 'Wednesday';
-    case DayIds.thursday:
-      return 'Thursday';
-    case DayIds.friday:
-      return 'Friday';
-    case DayIds.saturday:
-      return 'Saturday';
-    default:
-      throw Exception("Invalid Day Id");
-  }
-}

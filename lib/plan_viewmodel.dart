@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:reciplan3/data/repositories/day_repository.dart';
 import '../../data/repositories/recipe_repository.dart';
 import '../../data/entities/recipe.dart';
-import 'data/entities/day.dart';
 
 //Repository for PlanPage and ManagePlanScreen
 class PlanViewModel extends ChangeNotifier {
@@ -13,6 +12,13 @@ class PlanViewModel extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _error;
+  String? _msg;
+  bool _isSuccess = false;
+
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  String? get msg => _msg;
+  bool get isSuccess => _isSuccess;
 
   PlanViewModel(this._recipeRepository, this._dayRepository);
 
@@ -21,33 +27,14 @@ class PlanViewModel extends ChangeNotifier {
     return _dayRepository.getWeekRecipes().asBroadcastStream();
   }
 
-  // Update recipe
-  Future<void> updateRecipe(Recipe recipe) async {
+  //Method to add a recipe to a day
+  Future<void> addRecipeToDay(int dayId, int mealType, recipeId) async {
     try {
-      _isLoading = true;
-      _error = null;
-      await _recipeRepository.updateRecipe(recipe);
+      await _dayRepository.updateDayMeal(dayId, mealType, recipeId);
+      _isSuccess = true;
     } catch (e) {
-      _error = 'Failed to update recipe: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  //Method to remove a recipe from a day
-  Future<void> clearRecipeInDay(int dayId, int mealType) async {
-    try {
-      _isLoading = true;
-      _error = null;
-      //use mealType as recipeId to set recipe as empty (0,1,2)
-      await _dayRepository.updateDayMeal(dayId, mealType, mealType);
-      notifyListeners();
-    } catch (e) {
-      _error = 'Failed to update recipe: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _isSuccess = false;
+      _error = e.toString();
     }
   }
 
@@ -63,3 +50,19 @@ class PlanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+
+
+  // // Update recipe
+  // Future<void> updateRecipe(Recipe recipe) async {
+  //   try {
+  //     _isLoading = true;
+  //     _error = null;
+  //     await _recipeRepository.updateRecipe(recipe);
+  //   } catch (e) {
+  //     _error = 'Failed to update recipe: $e';
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }

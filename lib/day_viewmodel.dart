@@ -42,15 +42,15 @@ class DayViewModel extends ChangeNotifier {
   }
 
   // Update existing day
-  Future<void> updateDay(int dayId, int recipeId, int mealType) async {
-    try {
-      await _dayRepository.updateDayMeal(dayId, recipeId, mealType);
-      await loadDays();
-    } catch (e) {
-      _error = 'Failed to update day: $e';
-      notifyListeners();
-    }
-  }
+  // Future<void> updateDay(int dayId, int recipeId, int mealType) async {
+  //   try {
+  //     await _dayRepository.updateDayMeal(dayId, recipeId, mealType);
+  //     await loadDays();
+  //   } catch (e) {
+  //     _error = 'Failed to update day: $e';
+  //     notifyListeners();
+  //   }
+  // }
 
   // Clear error
   void clearError() {

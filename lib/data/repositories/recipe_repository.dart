@@ -42,17 +42,17 @@ class RecipeRepository {
   }
 
   // Get breakfast collection recipes
-  Future<Stream<List<Recipe>>> getBreakfastCollectionRecipes() async {
+  Future<Stream<List<Recipe>>> getBreakfastCollection() async {
     return _recipeDao.getBreakfastCollectionRecipes();
   }
 
   // Get lunch collection recipes
-  Future<Stream<List<Recipe>>> getLunchCollectionRecipes() async {
+  Future<Stream<List<Recipe>>> getLunchCollection() async {
     return _recipeDao.getLunchCollectionRecipes();
   }
 
   // Get dinner collection recipes
-  Future<Stream<List<Recipe>>> getDinnerCollectionRecipes() async {
+  Future<Stream<List<Recipe>>> getDinnerCollection() async {
     return _recipeDao.getDinnerCollectionRecipes();
   }
 

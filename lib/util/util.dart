@@ -35,3 +35,24 @@ class DayIds {
   static const int saturday = 7;
 }
 
+//match day with id
+String getDayName(int dayId) {
+  switch (dayId) {
+    case DayIds.sunday:
+      return 'Sunday';
+    case DayIds.monday:
+      return 'Monday';
+    case DayIds.tuesday:
+      return 'Tuesday';
+    case DayIds.wednesday:
+      return 'Wednesday';
+    case DayIds.thursday:
+      return 'Thursday';
+    case DayIds.friday:
+      return 'Friday';
+    case DayIds.saturday:
+      return 'Saturday';
+    default:
+      throw Exception("Invalid Day Id");
+  }
+}

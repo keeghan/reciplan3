@@ -4,17 +4,27 @@ import 'package:flutter/foundation.dart';
 import '../../data/repositories/recipe_repository.dart';
 import '../../data/entities/recipe.dart';
 
-enum RecipeType { breakfast, lunch, dinner, snack, favorite }
+enum RecipeType {
+  breakfast,
+  lunch,
+  dinner,
+  snack,
+  //mealType:Collection used my ManageDayScreen
+  breakfastCollection,
+  lunchCollection,
+  dinnerCollection,
+}
 
 class RecipeViewModel extends ChangeNotifier {
   final RecipeRepository _recipeRepository;
   final Map<RecipeType, StreamSubscription?> _subscriptions = {};
 
   List<Recipe> _recipes = [];
-  List<Recipe> _favoriteRecipes = [];
   List<Recipe> _recipeForDay = [];
+  //handle collections and favorites separately
   List<Recipe> _collections = [];
   List<Recipe> _favorites = [];
+
   bool _isLoading = false;
   String? _error;
 
@@ -22,7 +32,6 @@ class RecipeViewModel extends ChangeNotifier {
 
   // Getters
   List<Recipe> get recipes => _recipes;
-  List<Recipe> get favoriteRecipes => _favoriteRecipes;
   List<Recipe> get recipeForDay => _recipeForDay;
   List<Recipe> get collections => _collections;
   List<Recipe> get favorites => _favorites;
@@ -30,20 +39,8 @@ class RecipeViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  @override
-  void dispose() {
-    _cancelAllSubscriptions();
-    super.dispose();
-  }
-
-  void _cancelAllSubscriptions() {
-    for (var sub in _subscriptions.values) {
-      sub?.cancel();
-    }
-    _subscriptions.clear();
-  }
-
-  Future<void> loadRecipes(RecipeType type) async {
+  //Loads a list of recipes for various screens
+  Future<void> loadMealTypeRecipes(RecipeType type) async {
     print("${type.toString()} called");
 
     try {
@@ -63,16 +60,17 @@ class RecipeViewModel extends ChangeNotifier {
           stream = await _recipeRepository.getDinners();
         case RecipeType.snack:
           stream = await _recipeRepository.getSnacks();
-        //Todo: Remove favorites
-        case RecipeType.favorite:
-          stream = await _recipeRepository.getFavoriteRecipes();
+        case RecipeType.breakfastCollection:
+          stream = await _recipeRepository.getBreakfastCollection();
+        case RecipeType.lunchCollection:
+          stream = await _recipeRepository.getLunchCollection();
+        case RecipeType.dinnerCollection:
+          stream = await _recipeRepository.getDinnerCollection();
       }
 
       _subscriptions[type] = stream.listen(
         (recipes) {
-          type == RecipeType.favorite
-              ? _favoriteRecipes = recipes
-              : _recipes = recipes;
+          _recipes = recipes;
           _isLoading = false;
           notifyListeners();
         },
@@ -81,13 +79,6 @@ class RecipeViewModel extends ChangeNotifier {
     } catch (e) {
       handleError(e);
     }
-  }
-
-  // Maintain existing helper methods
-  void handleError(dynamic e) {
-    _isLoading = false;
-    _error = 'Failed to load recipes: $e';
-    notifyListeners();
   }
 
   Future<void> loadRecipeForDay(
@@ -151,8 +142,7 @@ class RecipeViewModel extends ChangeNotifier {
 
   Future<void> createRecipe(Recipe recipe) async {
     try {
-      _isLoading = true;
-      _error = null;
+      setLoading();
       await _recipeRepository.createRecipe(recipe);
     } catch (e) {
       _error = 'Failed to create recipe: $e';
@@ -165,8 +155,7 @@ class RecipeViewModel extends ChangeNotifier {
   // Update recipe
   Future<void> updateRecipe(Recipe recipe) async {
     try {
-      _isLoading = true;
-      _error = null;
+      setLoading();
       await _recipeRepository.updateRecipe(recipe);
     } catch (e) {
       _error = 'Failed to update recipe: $e';
@@ -179,8 +168,7 @@ class RecipeViewModel extends ChangeNotifier {
   // Delete recipe
   Future<void> deleteRecipe(int id) async {
     try {
-      _isLoading = true;
-      _error = null;
+      setLoading();
       await _recipeRepository.deleteRecipeById(id);
     } catch (e) {
       _error = 'Failed to delete recipe: $e';
@@ -194,5 +182,30 @@ class RecipeViewModel extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  void setLoading() {
+    _isLoading = true;
+    _error = null;
+  }
+
+  // Maintain existing helper methods
+  void handleError(dynamic e) {
+    _isLoading = false;
+    _error = 'Failed to load recipes: $e';
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _cancelAllSubscriptions();
+    super.dispose();
+  }
+
+  void _cancelAllSubscriptions() {
+    for (var sub in _subscriptions.values) {
+      sub?.cancel();
+    }
+    _subscriptions.clear();
   }
 }

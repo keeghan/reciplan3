@@ -33,6 +33,7 @@ class _CollectionManagementScreenState
     });
   }
 
+  //load 
   void _loadRecipes() {
     RecipeType type;
     switch (widget.collectionId) {
@@ -45,7 +46,7 @@ class _CollectionManagementScreenState
       default:
         type = RecipeType.snack;
     }
-    _viewModel.loadRecipes(type);
+    _viewModel.loadMealTypeRecipes(type);
   }
 
   @override

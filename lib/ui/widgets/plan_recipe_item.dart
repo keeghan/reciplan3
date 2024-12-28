@@ -9,7 +9,6 @@ class PlanRecipeItem extends StatelessWidget {
   final String recipeName;
   final int mealType;
   final String imageUrl;
-  final VoidCallback onRecipeSwiped;
 
   const PlanRecipeItem({
     super.key,
@@ -17,45 +16,40 @@ class PlanRecipeItem extends StatelessWidget {
     required this.mealType,
     required this.imageUrl,
     required this.recipeId,
-    required this.onRecipeSwiped,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      direction: DismissDirection.horizontal,
-      key: ValueKey('dismissible_${recipeId}_$mealType'),
-      onDismissed: (direction) {
-        onRecipeSwiped();
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 2, horizontal: 0),
-        padding: EdgeInsets.fromLTRB(10, 4, 4, 4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.2),
-              blurRadius: 6,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Left Column: Texts
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recipeName,
-                    style: TextStyle(
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 0),
+      padding: EdgeInsets.fromLTRB(10, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.2),
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Left Column: Texts
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  recipeName,
+                  style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                      color: const Color.fromARGB(255, 62, 62, 62)),
+                ),
+                if (mealType != -1) ...[
+                  //no recipe type is -1
                   SizedBox(height: 5),
                   Text(
                     getMealType(mealType),
@@ -66,26 +60,26 @@ class PlanRecipeItem extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            // Right Column: Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: recipeId < 3
-                  ? Image.asset(
-                      'assets/images/recipe_placeholder.jpg',
-                      height: 60,
-                      width: 60,
-                      fit: BoxFit.cover,
-                    )
-                  : NetworkImageWithPlaceholder(
-                      imageUrl: imageUrl,
-                      height: 60,
-                      width: 60,
-                    ),
-            ),
-          ],
-        ),
+          ),
+          // Right Column: Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: recipeId < 3
+                ? Image.asset(
+                    'assets/images/image_placeholder.jpg',
+                    height: 60,
+                    width: 60,
+                    fit: BoxFit.cover,
+                  )
+                : NetworkImageWithPlaceholder(
+                    imageUrl: imageUrl,
+                    height: 60,
+                    width: 60,
+                  ),
+          ),
+        ],
       ),
     );
   }

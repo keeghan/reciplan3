@@ -59,11 +59,6 @@ class _PlanPageState extends State<PlanPage> {
                       ),
                     );
                   },
-                  onRecipeSwiped: (int recipeId, int mealType) {
-                    _viewModel.clearRecipeInDay(dayId, mealType);
-                    // setState(() {print("--------------------set in motion----------------------------");});
-                   // Todo: Rebulid only correct planDayItem
-                  },
                 );
               },
             );
