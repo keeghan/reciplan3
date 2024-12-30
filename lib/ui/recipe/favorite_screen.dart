@@ -19,17 +19,13 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
   void initState() {
     super.initState();
     _viewModel = locator.get<RecipeViewModel>();
-    _loadRecipes();
+    _viewModel.loadFavoriteRecipes();
 
     _viewModel.addListener(() {
       if (mounted) {
         setState(() {});
       }
     });
-  }
-
-  void _loadRecipes() {
-    _viewModel.loadFavoriteRecipes();
   }
 
   @override

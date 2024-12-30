@@ -53,19 +53,19 @@ class RecipeViewModel extends ChangeNotifier {
       final Stream<List<Recipe>> stream;
       switch (type) {
         case RecipeType.breakfast:
-          stream = await _recipeRepository.getBreakfasks();
+          stream = _recipeRepository.getBreakfasks();
         case RecipeType.lunch:
-          stream = await _recipeRepository.getLunches();
+          stream = _recipeRepository.getLunches();
         case RecipeType.dinner:
-          stream = await _recipeRepository.getDinners();
+          stream = _recipeRepository.getDinners();
         case RecipeType.snack:
-          stream = await _recipeRepository.getSnacks();
+          stream = _recipeRepository.getSnacks();
         case RecipeType.breakfastCollection:
-          stream = await _recipeRepository.getBreakfastCollection();
+          stream = _recipeRepository.getBreakfastCollection();
         case RecipeType.lunchCollection:
-          stream = await _recipeRepository.getLunchCollection();
+          stream = _recipeRepository.getLunchCollection();
         case RecipeType.dinnerCollection:
-          stream = await _recipeRepository.getDinnerCollection();
+          stream = _recipeRepository.getDinnerCollection();
       }
 
       _subscriptions[type] = stream.listen(
@@ -86,7 +86,7 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      final stream = await _recipeRepository.getThreeRecipesInOrder(
+      final stream = _recipeRepository.getThreeRecipesInOrder(
           breakfastId, lunchId, dinnerId);
       stream.listen(
         (recipes) {
@@ -106,7 +106,7 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      final stream = await _recipeRepository.getCollectionRecipes();
+      final stream = _recipeRepository.getCollectionRecipes();
       stream.listen(
         (collections) {
           _collections = collections;
@@ -125,10 +125,11 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      final stream = await _recipeRepository.getFavoriteRecipes();
+      final stream = _recipeRepository.getFavoriteRecipes();
       stream.listen(
         (favorites) {
           _favorites = favorites;
+          _isLoading = false;
           notifyListeners();
         },
         onError: (e) {

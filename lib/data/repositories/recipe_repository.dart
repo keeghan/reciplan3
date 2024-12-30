@@ -32,27 +32,27 @@ class RecipeRepository {
   }
 
   // Get favorite recipes
-  Future<Stream<List<Recipe>>> getFavoriteRecipes() async {
+  Stream<List<Recipe>> getFavoriteRecipes() {
     return _recipeDao.getFavoriteRecipes();
   }
 
   // Get  collection recipes
-  Future<Stream<List<Recipe>>> getCollectionRecipes() async {
+  Stream<List<Recipe>> getCollectionRecipes() {
     return _recipeDao.getAllCollectionsRecipes();
   }
 
   // Get breakfast collection recipes
-  Future<Stream<List<Recipe>>> getBreakfastCollection() async {
+  Stream<List<Recipe>> getBreakfastCollection() {
     return _recipeDao.getBreakfastCollectionRecipes();
   }
 
   // Get lunch collection recipes
-  Future<Stream<List<Recipe>>> getLunchCollection() async {
+  Stream<List<Recipe>> getLunchCollection() {
     return _recipeDao.getLunchCollectionRecipes();
   }
 
   // Get dinner collection recipes
-  Future<Stream<List<Recipe>>> getDinnerCollection() async {
+  Stream<List<Recipe>> getDinnerCollection() {
     return _recipeDao.getDinnerCollectionRecipes();
   }
 
@@ -62,22 +62,22 @@ class RecipeRepository {
   // }
 
   // Get breakfast collection recipes
-  Future<Stream<List<Recipe>>> getBreakfasks() async {
+  Stream<List<Recipe>> getBreakfasks() {
     return _recipeDao.getBreakfastRecipes();
   }
 
   // Get lunch collection recipes
-  Future<Stream<List<Recipe>>> getLunches() async {
+  Stream<List<Recipe>> getLunches() {
     return _recipeDao.getLunchRecipes();
   }
 
   // Get dinner collection recipes
-  Future<Stream<List<Recipe>>> getDinners() async {
+  Stream<List<Recipe>> getDinners() {
     return _recipeDao.getDinnerRecipes();
   }
 
   // Get dinner collection recipes
-  Future<Stream<List<Recipe>>> getSnacks() async {
+  Stream<List<Recipe>> getSnacks() {
     return _recipeDao.getSnackRecipes();
   }
 
@@ -86,8 +86,8 @@ class RecipeRepository {
     return _recipeDao.getActiveDayRecipes(dayIds);
   }
 
-  Future<Stream<List<Recipe>>> getThreeRecipesInOrder(
-      int breakfastId, int lunchId, int dinnerId) async {
+  Stream<List<Recipe>> getThreeRecipesInOrder(
+      int breakfastId, int lunchId, int dinnerId) {
     return _recipeDao.getThreeRecipesInOrder(breakfastId, lunchId, dinnerId);
   }
 }

@@ -24,15 +24,8 @@ class PlanRecipeItem extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 2, horizontal: 0),
       padding: EdgeInsets.fromLTRB(10, 4, 4, 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color:Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -46,7 +39,7 @@ class PlanRecipeItem extends StatelessWidget {
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 62, 62, 62)),
+                      color: const Color.fromARGB(255, 85, 85, 85)),
                 ),
                 if (mealType != -1) ...[
                   //no recipe type is -1

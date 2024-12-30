@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
 final ThemeData lightTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: const Color.fromARGB(255, 9, 117, 12),
-    secondary: const Color.fromARGB(222, 201, 128, 4),
+    secondary: const Color.fromARGB(222, 172, 110, 2),
   ),
   useMaterial3: true,
 );
@@ -71,7 +71,7 @@ final ThemeData lightTheme = ThemeData(
 final ThemeData darkTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: const Color.fromARGB(255, 9, 117, 12),
-    secondary: const Color.fromARGB(222, 201, 128, 4),
+    secondary: const Color.fromARGB(222, 172, 110, 2),
     brightness: Brightness.dark,
   ),
   useMaterial3: true,

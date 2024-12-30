@@ -10,7 +10,8 @@ class MealType {
 void showSnackBar(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text(message),
+      backgroundColor: Theme.of(context).colorScheme.surfaceTint,
+      content: Text(message, textAlign: TextAlign.center),
       duration: const Duration(seconds: 2),
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(16),

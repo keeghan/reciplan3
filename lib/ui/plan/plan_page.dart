@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:reciplan3/ui/plan/manage_day_screen.dart';
 import 'package:reciplan3/ui/widgets/plan_day_item.dart';
 
-import '../../data/entities/recipe.dart';
 import '../../main.dart';
 import '../../plan_viewmodel.dart';
 
@@ -20,51 +19,62 @@ class _PlanPageState extends State<PlanPage> {
   void initState() {
     super.initState();
     _viewModel = locator.get<PlanViewModel>();
+    _viewModel.loadWeekRecipes();
+    _viewModel.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
+    _viewModel.removeListener(() {
+      setState(() {});
+    });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<Map<int, List<Recipe>>>(
-        stream: _viewModel.weekRecipesStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No recipes found.'));
-          } else {
-            final weekRecipes = snapshot.data!;
-
-            //day item here
-            return ListView.builder(
-              itemCount: 7,
-              itemBuilder: (context, index) {
-                final dayId = weekRecipes.keys.elementAt(index);
-                final recipes = weekRecipes[dayId];
-                return PlanDayItem(
-                  dayId: dayId,
-                  dayRecipes: recipes!,
-                  onEditDayPlanPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ManageDayScreen(dayId: dayId),
-                      ),
+    return FocusScope(
+        onFocusChange: (hasFocus) {
+           _viewModel.loadWeekRecipes();
+        },
+        child: Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _viewModel.weekRecipes.length,
+                  itemBuilder: (context, index) {
+                    final dayId = _viewModel.weekRecipes.keys.elementAt(index);
+                    final recipes = _viewModel.weekRecipes[dayId];
+                    if (recipes == null) {
+                      return Center(child: Text('${_viewModel.error}'));
+                    }
+                    return PlanDayItem(
+                      dayId: dayId,
+                      dayRecipes: recipes,
+                      onEditDayPlanPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ManageDayScreen(dayId: dayId),
+                          ),
+                        );
+                      },
                     );
                   },
-                );
-              },
-            );
-          }
-        },
-      ),
-    );
+                ),
+              ),
+              //Test Reload
+              TextButton(
+                onPressed: () => _viewModel.loadWeekRecipes(),
+                child: Text("Reload"),
+              )
+            ],
+          ),
+        ));
   }
 }

@@ -20,11 +20,26 @@ class PlanViewModel extends ChangeNotifier {
   String? get msg => _msg;
   bool get isSuccess => _isSuccess;
 
+  Map<int, List<Recipe>> _weekRecipes = {};
+  Map<int, List<Recipe>> get weekRecipes => _weekRecipes;
+
   PlanViewModel(this._recipeRepository, this._dayRepository);
 
-//Stream for plan_page
-  Stream<Map<int, List<Recipe>>> get weekRecipesStream {
-    return _dayRepository.getWeekRecipes().asBroadcastStream();
+  Future<void> loadWeekRecipes() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final stream = _dayRepository.getWeekRecipes();
+      stream.listen((weekRecipes) {
+        _weekRecipes = weekRecipes;
+        _isLoading = false;
+        notifyListeners();
+      });
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      handleError(e);
+    }
   }
 
   //Method to add a recipe to a day
