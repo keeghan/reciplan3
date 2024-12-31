@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:reciplan3/data/repositories/day_repository.dart';
-import '../../data/repositories/recipe_repository.dart';
 import '../../data/entities/recipe.dart';
 
 //Repository for PlanPage and ManagePlanScreen
 class PlanViewModel extends ChangeNotifier {
-  final RecipeRepository _recipeRepository;
   final DayRepository _dayRepository;
 
   bool _isLoading = false;
@@ -23,7 +21,7 @@ class PlanViewModel extends ChangeNotifier {
   Map<int, List<Recipe>> _weekRecipes = {};
   Map<int, List<Recipe>> get weekRecipes => _weekRecipes;
 
-  PlanViewModel(this._recipeRepository, this._dayRepository);
+  PlanViewModel(this._dayRepository);
 
   Future<void> loadWeekRecipes() async {
     _isLoading = true;
@@ -65,19 +63,3 @@ class PlanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-
-
-
-  // // Update recipe
-  // Future<void> updateRecipe(Recipe recipe) async {
-  //   try {
-  //     _isLoading = true;
-  //     _error = null;
-  //     await _recipeRepository.updateRecipe(recipe);
-  //   } catch (e) {
-  //     _error = 'Failed to update recipe: $e';
-  //   } finally {
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   }
-  // }

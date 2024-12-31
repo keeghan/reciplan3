@@ -44,13 +44,13 @@ abstract class RecipeDao {
   Future<void> deleteRecipeWithClear(Recipe recipe) async {
     switch (recipe.mealType) {
       case MealType.breakfast:
-        await clearRecipeFromBreakfast(recipe.id);
+        await clearRecipeFromBreakfast(recipe.id!);
         break;
       case MealType.lunch:
-        await clearRecipeFromLunch(recipe.id);
+        await clearRecipeFromLunch(recipe.id!);
         break;
       case MealType.dinner:
-        await clearRecipeFromDinner(recipe.id);
+        await clearRecipeFromDinner(recipe.id!);
         break;
       default:
         throw Exception("default recipe being deleted");

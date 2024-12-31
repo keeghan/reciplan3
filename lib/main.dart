@@ -26,7 +26,7 @@ Future<void> setupLocator() async {
   locator.registerSingleton<DayRepository>(DayRepository(locator<DayDao>()));
 
   locator.registerFactory<RecipeViewModel>(() => RecipeViewModel(locator<RecipeRepository>()));
-  locator.registerFactory<PlanViewModel>(() =>PlanViewModel(locator<RecipeRepository>(), locator<DayRepository>()));
+  locator.registerFactory<PlanViewModel>(() =>PlanViewModel(locator<DayRepository>()));
 }
 
 void main() async {

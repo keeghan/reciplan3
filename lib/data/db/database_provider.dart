@@ -96,7 +96,7 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.missing0,
         collection: false,
         favorite: false,
-        mealType: MealType.breakfast,
+        mealType: MealType.missing,
         videoLink: RecipeVideoUrls.missing0),
     Recipe(
         id: 1,
@@ -108,7 +108,7 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.missing0,
         collection: false,
         favorite: false,
-        mealType: MealType.lunch,
+        mealType: MealType.missing,
         videoLink: RecipeVideoUrls.missing0),
     Recipe(
         id: 2,
@@ -120,7 +120,7 @@ class DatabaseProvider {
         imageUrl: RecipeImgUrls.missing0,
         collection: false,
         favorite: false,
-        mealType: MealType.dinner,
+        mealType: MealType.missing,
         videoLink: RecipeVideoUrls.missing0),
     Recipe(
         id: 3,

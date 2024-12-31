@@ -3,7 +3,7 @@ import 'package:floor/floor.dart';
 @Entity(tableName: 'recipe_table')
 class Recipe {
   @PrimaryKey(autoGenerate: true)
-  final int id;
+  final int? id;
 
   final String name;
   final int mins;
@@ -18,7 +18,7 @@ class Recipe {
   final String videoLink;
 
   Recipe(
-      {required this.id,
+      {this.id,
       required this.name,
       required this.mins,
       required this.numIngredients,

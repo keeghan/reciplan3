@@ -35,7 +35,7 @@ class FavoriteRecipeCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: NetworkImageWithPlaceholder(
+                  child: ReciplanImage(
                     imageUrl: imageUrl,
                     fit: BoxFit.cover, // Make image cover available space
                     width: double.infinity, height: double.infinity,

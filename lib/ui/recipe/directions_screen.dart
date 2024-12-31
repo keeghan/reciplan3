@@ -56,7 +56,7 @@ class DirectionsScreen extends StatelessWidget {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      NetworkImageWithPlaceholder(
+                      ReciplanImage(
                         imageUrl: recipe.imageUrl,
                         width: double.infinity,
                         height: double.infinity,

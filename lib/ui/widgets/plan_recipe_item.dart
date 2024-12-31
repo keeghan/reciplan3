@@ -24,7 +24,7 @@ class PlanRecipeItem extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 2, horizontal: 0),
       padding: EdgeInsets.fromLTRB(10, 4, 4, 4),
       decoration: BoxDecoration(
-        color:Theme.of(context).colorScheme.surfaceContainer,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -66,7 +66,7 @@ class PlanRecipeItem extends StatelessWidget {
                     width: 60,
                     fit: BoxFit.cover,
                   )
-                : NetworkImageWithPlaceholder(
+                : ReciplanImage(
                     imageUrl: imageUrl,
                     height: 60,
                     width: 60,
@@ -87,6 +87,8 @@ String getMealType(int mealType) {
       return 'lunch';
     case MealType.dinner:
       return 'dinner';
+    case MealType.missing:
+      return '';
     default:
       throw Exception("Invalid Recipe MealType");
   }

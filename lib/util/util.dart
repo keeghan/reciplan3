@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class MealType {
   static const int breakfast = 0;
   static const int lunch = 1;
   static const int dinner = 2;
   static const int snack = 3;
+  static const int missing = 4;
 }
 
 void showSnackBar(BuildContext context, String message) {
@@ -55,5 +59,24 @@ String getDayName(int dayId) {
       return 'Saturday';
     default:
       throw Exception("Invalid Day Id");
+  }
+}
+
+Future<Map<String, dynamic>> storeFileInAppDocumentsDirectory(File file) async {
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final filename = file.path.split('/').last;
+    final extension = filename.split('.').last;
+
+    final newFilename = '${DateTime.now().millisecondsSinceEpoch}.$extension';
+    final newFile = File('${directory.path}/$newFilename');
+
+    await file.copy(newFile.path);
+    print(newFile.path);
+    print('nnnF');
+
+    return {'success': true, 'filePath': newFile.path};
+  } catch (error) {
+    return {'success': false, 'errorMessage': 'Error storing file: $error'};
   }
 }

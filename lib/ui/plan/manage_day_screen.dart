@@ -135,7 +135,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                             recipeName: recipe.name,
                             mealType: -1,
                             imageUrl: recipe.imageUrl,
-                            recipeId: recipe.id,
+                            recipeId: recipe.id!,
                           ),
                         );
                       });

@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:reciplan3/data/entities/recipe.dart';
+
+import '../../main.dart';
+import '../../recipe_viewmodel.dart';
+import '../../util/util.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -12,61 +17,30 @@ class AddPage extends StatefulWidget {
 
 class _AddPageState extends State<AddPage> {
   final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  final _directionController = TextEditingController();
   final _ingredientsController = TextEditingController();
+  final _videoLinkController = TextEditingController();
   File? _selectedImage;
+  String _newRecipeImage = '';
 
   // Form validation state
   bool _showTitleError = false;
   bool _showDirectionsError = false;
   bool _showImageError = false;
-  bool _showIndgredientsErro = false;
+  bool _showIndgredientsError = false;
 
   //bottomNavigationVariables
-  int _selectedRadio = 0;
+  int _mealType = 0;
   bool _isFavorite = false;
-  bool _isCollection = false;
+  bool _isCollection = true;
   int _selectedDuration = 10;
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  late RecipeViewModel _viewModel;
 
-    if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-        _showImageError = false;
-      });
-    }
-  }
-
-  void _validateAndProceed(BuildContext context) {
-    // Reset error states
-    setState(() {
-      _showTitleError = false;
-      _showDirectionsError = false;
-      _showImageError = false;
-    });
-
-    // Validate title
-    if (_titleController.text.trim().isEmpty) {
-      setState(() => _showTitleError = true);
-    }
-
-    // Validate directions
-    if (_descriptionController.text.trim().isEmpty) {
-      setState(() => _showDirectionsError = true);
-    }
-
-    // Validate image
-    if (_selectedImage == null) {
-      setState(() => _showImageError = true);
-    }
-
-    // If all validations pass, proceed to next step
-    if (!_showTitleError && !_showDirectionsError && !_showImageError) {
-      _showBottomSheet(context);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = locator.get<RecipeViewModel>();
   }
 
   @override
@@ -84,8 +58,7 @@ class _AddPageState extends State<AddPage> {
                 controller: _titleController,
                 decoration: InputDecoration(
                   labelText: 'Recipe Title',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   errorText: _showTitleError ? 'Title is required' : null,
                 ),
                 onChanged: (value) {
@@ -98,15 +71,13 @@ class _AddPageState extends State<AddPage> {
 
               const SizedBox(height: 16),
 
-              // Recipe Description
+              // Recipe Direction
               TextField(
-                controller: _descriptionController,
+                controller: _directionController,
                 decoration: InputDecoration(
                   labelText: 'Directions',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  errorText:
-                      _showDirectionsError ? 'Directions are required' : null,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  errorText: _showDirectionsError ? 'Directions are required' : null,
                 ),
                 onChanged: (value) {
                   if (_showDirectionsError && value.trim().isNotEmpty) {
@@ -132,9 +103,7 @@ class _AddPageState extends State<AddPage> {
                       height: 200,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        border: _showImageError
-                            ? Border.all(color: Colors.red, width: 2)
-                            : null,
+                        border: _showImageError ? Border.all(color: Colors.red, width: 2) : null,
                       ),
                       child: _selectedImage != null
                           ? ClipRRect(
@@ -144,17 +113,14 @@ class _AddPageState extends State<AddPage> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                  const Icon(Icons.add_circle_outline,
-                                      size: 48),
-                                  if (_showImageError)
-                                    const Text(
-                                      'Image required',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                ])),
+                          : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              const Icon(Icons.add_circle_outline, size: 48),
+                              if (_showImageError)
+                                const Text(
+                                  'Image required',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                            ])),
                 ),
               ),
 
@@ -176,8 +142,9 @@ class _AddPageState extends State<AddPage> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
+    _directionController.dispose();
     _ingredientsController.dispose();
+    _videoLinkController.dispose();
     super.dispose();
   }
 
@@ -186,113 +153,155 @@ class _AddPageState extends State<AddPage> {
   void _showBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         //Using Stateful builder to manage Ui state in BottomSheet
         return StatefulBuilder(
           builder: (context, setStateBottomSheet) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        // Recipe Ingredients
-                        Expanded(
-                          child: TextField(
-                            controller: _ingredientsController,
-                            decoration: InputDecoration(
-                              labelText: 'Ingrdients List',
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            maxLines: 5,
+            return Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      // Recipe Ingredients
+                      Expanded(
+                        child: TextField(
+                          controller: _ingredientsController,
+                          decoration: InputDecoration(
+                            labelText: 'Ingrdients List',
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            errorText: _showIndgredientsError ? 'Ingredients is required' : null,
                           ),
+                          maxLines: 5,
                         ),
-                        SizedBox(width: 4),
-                        // Duration
-                        Column(
-                          children: [
-                            Text('Duration',
-                                style: Theme.of(context).textTheme.bodySmall),
-                            NumberPicker(
-                              minValue: 5,
-                              maxValue: 200,
-                              value: _selectedDuration,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedDuration = value;
-                                });
-                                setStateBottomSheet(
-                                    () {}); // Redraw bottomSheet
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    // Recipe Type Button Group
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildRadioOption(0, 'breakfast', setStateBottomSheet),
-                        _buildRadioOption(1, 'lunch', setStateBottomSheet),
-                        _buildRadioOption(2, 'dinner', setStateBottomSheet),
-                        _buildRadioOption(3, 'snack', setStateBottomSheet),
-                      ],
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-                      child: Row(
+                      ),
+                      SizedBox(width: 4),
+                      // Duration
+                      Column(
                         children: [
-                          // Collection Switch
-                          Text('Collection: '),
-                          Transform.scale(
-                            scale: 0.8,
-                            child: Switch(
-                              value: _isCollection,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  _isCollection = value;
-                                  if (!_isCollection) _isFavorite = false;
-                                });
-                                setStateBottomSheet(
-                                    () {}); // Triggering the inner setState for BottomSheet
-                              },
-                            ),
+                          Text('Duration', style: Theme.of(context).textTheme.bodySmall),
+                          NumberPicker(
+                            minValue: 5,
+                            maxValue: 200,
+                            value: _selectedDuration,
+                            onChanged: (value) {
+                              setState(() => _selectedDuration = value);
+                              setStateBottomSheet(() {}); // Redraw bottomSheet
+                            },
                           ),
-                          Expanded(child: SizedBox()),
-                          // Favorite Switch
-                          Text('Favorite: '),
-                          Transform.scale(
-                            scale: 0.8,
-                            child: Switch(
-                              value: _isFavorite,
-                              onChanged: (bool value) {
-                                setState(() => _isFavorite = value);
-                                if (_isFavorite) _isCollection = true;
-                                setStateBottomSheet(
-                                    () {}); // Triggering the inner setState for BottomSheet
-                              },
-                            ),
-                          )
                         ],
                       ),
-                    ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  // Recipe Type Button Group
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildRadioOption(0, 'breakfast', setStateBottomSheet),
+                      _buildRadioOption(1, 'lunch', setStateBottomSheet),
+                      _buildRadioOption(2, 'dinner', setStateBottomSheet),
+                      _buildRadioOption(3, 'snack', setStateBottomSheet),
+                    ],
+                  ),
 
-                    // Save Button
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(elevation: 6),
-                      onPressed: () {
-                        //TODO: Save Recipe
-                        Navigator.of(context).pop(); // Close the bottom sheet
-                      },
-                      child: Text('Save'),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+                    child: Row(
+                      children: [
+                        // Collection Switch
+                        Text('Collection: '),
+                        Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            value: _isCollection,
+                            onChanged: (bool value) {
+                              setState(() {
+                                _isCollection = value;
+                                if (!_isCollection) _isFavorite = false;
+                              });
+                              setStateBottomSheet(
+                                  () {}); // Triggering the inner setState for BottomSheet
+                            },
+                          ),
+                        ),
+                        Expanded(child: SizedBox()),
+                        // Favorite Switch
+                        Text('Favorite: '),
+                        Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            value: _isFavorite,
+                            onChanged: (bool value) {
+                              setState(() => _isFavorite = value);
+                              if (_isFavorite) _isCollection = true;
+                              setStateBottomSheet(
+                                  () {}); // Triggering the inner setState for BottomSheet
+                            },
+                          ),
+                        )
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Video Link
+                  TextField(
+                    controller: _videoLinkController,
+                    decoration: InputDecoration(
+                      labelText: 'Video Link (Optional)',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    maxLines: 1,
+                  ),
+                  SizedBox(height: 8),
+
+                  // Save Button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        elevation: 6, backgroundColor: Theme.of(context).colorScheme.secondary),
+                    onPressed: () async {
+                      setState(() {
+                        _showIndgredientsError = _ingredientsController.text.trim().isEmpty;
+                      });
+                      setStateBottomSheet(() {});
+
+                      //extra Validation
+                      if (_showTitleError ||
+                          _showDirectionsError ||
+                          _showImageError ||
+                          _showIndgredientsError ||
+                          _selectedImage == null) {
+                        showSnackBar(context, 'Please fill all required fields.');
+                        return;
+                      }
+
+                      _newRecipeImage = await _storeRecipeImage();
+                      if (_newRecipeImage.startsWith('error')) {
+                        showSnackBar(context, _newRecipeImage);
+                        return;
+                      }
+                      print('====newRecipe: $_newRecipeImage=====');
+
+                      await _saveRecipe();
+
+                      if (_viewModel.error != null) {
+                        showSnackBar(context, _viewModel.error!);
+                      } else {
+                        Navigator.of(context).pop();
+                        showSnackBar(context, 'Recipe saved successfully');
+                      }
+                      setStateBottomSheet(() {});
+                    },
+                    child: Text(
+                      'Save',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+
+                  SizedBox(height: 8),
+                ],
               ),
             );
           },
@@ -302,19 +311,17 @@ class _AddPageState extends State<AddPage> {
   }
 
 // Radio Button Widget to selected Recipe.MealType
-  Widget _buildRadioOption(
-      int value, String label, Function setStateBottomSheet) {
-    bool isSelected = _selectedRadio == value;
+  Widget _buildRadioOption(int value, String label, Function setStateBottomSheet) {
+    bool isSelected = _mealType == value;
 
     return GestureDetector(
       onTap: () {
-        setState(() => _selectedRadio = value);
+        setState(() => _mealType = value);
         setStateBottomSheet(() {});
       },
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(
-              color: Theme.of(context).colorScheme.primary, width: 2.0),
+          border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2.0),
           color: isSelected
               ? Theme.of(context).colorScheme.secondary
               : Theme.of(context).colorScheme.surfaceContainer,
@@ -322,8 +329,80 @@ class _AddPageState extends State<AddPage> {
         ),
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         margin: EdgeInsets.symmetric(vertical: 8),
-        child: Text(label),
+        child: Text(
+          label,
+          style:
+              TextStyle(color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface),
+        ),
       ),
     );
+  }
+
+  //Validation Methods and 'backEnd' operational Functions
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+        _showImageError = false;
+      });
+    }
+  }
+
+  void _validateAndProceed(BuildContext context) {
+    // Reset error states
+    setState(() {
+      _showTitleError = false;
+      _showDirectionsError = false;
+      _showImageError = false;
+    });
+
+    if (_titleController.text.trim().isEmpty) {
+      setState(() => _showTitleError = true);
+    }
+
+    if (_directionController.text.trim().isEmpty) {
+      setState(() => _showDirectionsError = true);
+    }
+
+    if (_selectedImage == null) {
+      setState(() => _showImageError = true);
+    }
+
+    // If all validations pass, proceed to next step
+    if (!_showTitleError && !_showDirectionsError && !_showImageError) {
+      _showBottomSheet(context);
+    }
+  }
+
+  Future<void> _saveRecipe() async {
+    //save recipe
+    Recipe recipe = Recipe(
+      // name: _titleController.text.trim(),
+      name: _newRecipeImage,
+      mins: _selectedDuration,
+      numIngredients: _ingredientsController.text.trim().split('\n').length,
+      direction: _directionController.text.trim(),
+      ingredients: _ingredientsController.text.trim(),
+      imageUrl: _newRecipeImage,
+      collection: _isCollection,
+      favorite: _isFavorite,
+      userCreated: true,
+      mealType: _mealType,
+      videoLink: _videoLinkController.text.trim(),
+    );
+    await _viewModel.createRecipe(recipe);
+  }
+
+  //Take Image selected and save it to AppDocumentsDirectory
+  Future<String> _storeRecipeImage() async {
+    Map<String, dynamic> result = await storeFileInAppDocumentsDirectory(_selectedImage!);
+    if (!result['success']) {
+      return 'Error: ${result['errorMessage']}';
+    } else {
+      return result['filePath'];
+    }
   }
 }

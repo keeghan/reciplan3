@@ -33,7 +33,7 @@ class CollectionRecipeCard extends StatelessWidget {
               ClipRRect(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(12)),
-                child: NetworkImageWithPlaceholder(
+                child: ReciplanImage(
                   imageUrl: imageUrl,
                   height: 250,
                   width: double.infinity,

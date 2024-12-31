@@ -41,12 +41,8 @@ class RecipeViewModel extends ChangeNotifier {
 
   //Loads a list of recipes for various screens
   Future<void> loadMealTypeRecipes(RecipeType type) async {
-    print("${type.toString()} called");
-
     try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
+      setLoading();
 
       _subscriptions[type]?.cancel();
 
@@ -71,73 +67,66 @@ class RecipeViewModel extends ChangeNotifier {
       _subscriptions[type] = stream.listen(
         (recipes) {
           _recipes = recipes;
-          _isLoading = false;
-          notifyListeners();
+          onSuccess();
         },
-        onError: handleError,
+        onError: onError,
       );
     } catch (e) {
-      handleError(e);
+      onError(e);
     }
   }
 
-  Future<void> loadRecipeForDay(
-      int breakfastId, int lunchId, int dinnerId) async {
+  Future<void> loadRecipeForDay(int breakfastId, int lunchId, int dinnerId) async {
     try {
-      _isLoading = true;
-      notifyListeners();
-      final stream = _recipeRepository.getThreeRecipesInOrder(
-          breakfastId, lunchId, dinnerId);
+      setLoading();
+      final stream = _recipeRepository.getThreeRecipesInOrder(breakfastId, lunchId, dinnerId);
       stream.listen(
         (recipes) {
           _recipeForDay = recipes;
-          notifyListeners();
+          onSuccess();
         },
         onError: (e) {
-          handleError(e);
+          onError(e);
         },
       );
     } catch (e) {
-      handleError(e);
+      onError(e);
     }
   }
 
   Future<void> loadCollectionRecipes() async {
     try {
-      _isLoading = true;
-      notifyListeners();
+      setLoading();
       final stream = _recipeRepository.getCollectionRecipes();
       stream.listen(
         (collections) {
           _collections = collections;
-          notifyListeners();
+          onSuccess();
         },
         onError: (e) {
-          handleError(e);
+          onError(e);
         },
       );
     } catch (e) {
-      handleError(e);
+      onError(e);
     }
   }
 
   Future<void> loadFavoriteRecipes() async {
     try {
-      _isLoading = true;
-      notifyListeners();
+      setLoading();
       final stream = _recipeRepository.getFavoriteRecipes();
       stream.listen(
         (favorites) {
           _favorites = favorites;
-          _isLoading = false;
-          notifyListeners();
+          onSuccess();
         },
         onError: (e) {
-          handleError(e);
+          onError(e);
         },
       );
     } catch (e) {
-      handleError(e);
+      onError(e);
     }
   }
 
@@ -145,11 +134,9 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       setLoading();
       await _recipeRepository.createRecipe(recipe);
+      onSuccess();
     } catch (e) {
-      _error = 'Failed to create recipe: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      onError(e);
     }
   }
 
@@ -158,11 +145,9 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       setLoading();
       await _recipeRepository.updateRecipe(recipe);
+      onSuccess();
     } catch (e) {
-      _error = 'Failed to update recipe: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      onError(e);
     }
   }
 
@@ -171,11 +156,9 @@ class RecipeViewModel extends ChangeNotifier {
     try {
       setLoading();
       await _recipeRepository.deleteRecipeById(id);
+      onSuccess();
     } catch (e) {
-      _error = 'Failed to delete recipe: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      onError(e);
     }
   }
 
@@ -188,12 +171,21 @@ class RecipeViewModel extends ChangeNotifier {
   void setLoading() {
     _isLoading = true;
     _error = null;
+    notifyListeners();
   }
 
-  // Maintain existing helper methods
-  void handleError(dynamic e) {
+  //Error Handle main
+  void onError(dynamic e) {
     _isLoading = false;
-    _error = 'Failed to load recipes: $e';
+    _error = 'Error: $e';
+    print(e);
+    notifyListeners();
+  }
+
+  void onSuccess() {
+    _error = null;
+    _isLoading = false;
+    print("operation Successful");
     notifyListeners();
   }
 
