@@ -282,22 +282,20 @@ class _AddPageState extends State<AddPage> {
                         showSnackBar(context, _newRecipeImage);
                         return;
                       }
-                      print('====newRecipe: $_newRecipeImage=====');
-
                       await _saveRecipe();
 
+                      if (!mounted) return;
                       if (_viewModel.error != null) {
                         showSnackBar(context, _viewModel.error!);
                       } else {
+                        FocusScope.of(context).unfocus();
                         Navigator.of(context).pop();
                         showSnackBar(context, 'Recipe saved successfully');
+                        _clearFields();
                       }
                       setStateBottomSheet(() {});
                     },
-                    child: Text(
-                      'Save',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    child: Text('Save', style: TextStyle(color: Colors.white)),
                   ),
 
                   SizedBox(height: 8),
@@ -380,8 +378,7 @@ class _AddPageState extends State<AddPage> {
   Future<void> _saveRecipe() async {
     //save recipe
     Recipe recipe = Recipe(
-      // name: _titleController.text.trim(),
-      name: _newRecipeImage,
+      name: _titleController.text.trim(),
       mins: _selectedDuration,
       numIngredients: _ingredientsController.text.trim().split('\n').length,
       direction: _directionController.text.trim(),
@@ -404,5 +401,25 @@ class _AddPageState extends State<AddPage> {
     } else {
       return result['filePath'];
     }
+  }
+
+  void _clearFields() {
+    _titleController.clear();
+    _directionController.clear();
+    _ingredientsController.clear();
+    _videoLinkController.clear();
+    _selectedImage = null;
+    _newRecipeImage = '';
+
+    _showTitleError = false;
+    _showDirectionsError = false;
+    _showImageError = false;
+    _showIndgredientsError = false;
+
+    _mealType = 0;
+    _isFavorite = false;
+    _isCollection = true;
+    _selectedDuration = 10;
+    setState(() {});
   }
 }

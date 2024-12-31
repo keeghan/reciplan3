@@ -60,7 +60,7 @@ class PlanDayItem extends StatelessWidget {
               final recipe = dayRecipes[index];
               return KeyedSubtree(
                 child: PlanRecipeItem(
-                  recipeName: recipe.name,
+                  name: recipe.name,
                   mealType: (recipe.mealType == MealType.missing) ? -1 : recipe.mealType,
                   imageUrl: recipe.imageUrl,
                   recipeId: recipe.id!,

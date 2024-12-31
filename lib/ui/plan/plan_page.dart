@@ -4,6 +4,7 @@ import 'package:reciplan3/ui/widgets/plan_day_item.dart';
 
 import '../../main.dart';
 import '../../plan_viewmodel.dart';
+import '../../util/util.dart';
 
 class PlanPage extends StatefulWidget {
   const PlanPage({super.key});
@@ -35,13 +36,38 @@ class _PlanPageState extends State<PlanPage> {
     super.dispose();
   }
 
+  Future<void> clearPlans() async {
+    await _viewModel.clearPlans();
+    if (_viewModel.error == null) {
+      showSnackBar(context, "Plans Cleared");
+    } else {
+      showSnackBar(context, _viewModel.error!);
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return FocusScope(
         onFocusChange: (hasFocus) {
-           _viewModel.loadWeekRecipes();
+          _viewModel.loadWeekRecipes();
         },
+        //TODO: fix AppBar
         child: Scaffold(
+          // appBar: AppBar(
+          //   actions: [
+          //     IconButton(
+          //         onPressed: () {
+          //           showDeleteConfirmationDialog(
+          //             context,
+          //             "Confirm Action",
+          //             "Are you sure you want to clear plans for the Week?",
+          //             clearPlans,
+          //           );
+          //         },
+          //         icon: Icon(Icons.delete))
+          //   ],
+          // ),
           body: Column(
             children: [
               Expanded(

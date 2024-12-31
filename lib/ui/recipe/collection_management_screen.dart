@@ -16,8 +16,7 @@ class CollectionManagementScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _CollectionManagementScreenState();
 }
 
-class _CollectionManagementScreenState
-    extends State<CollectionManagementScreen> {
+class _CollectionManagementScreenState extends State<CollectionManagementScreen> {
   late RecipeViewModel _viewModel;
 
   @override
@@ -33,7 +32,7 @@ class _CollectionManagementScreenState
     });
   }
 
-  //load 
+  //load
   void _loadRecipes() {
     RecipeType type;
     switch (widget.collectionId) {
@@ -72,24 +71,23 @@ class _CollectionManagementScreenState
           itemBuilder: (context, index) {
             final recipe = _viewModel.recipes[index];
             return ManageCollectionRecipeCard(
+              recipe: recipe,
               onCheckPress: () {
                 if (recipe.collection) {
-                  showSnackBar(context, "Recipe already in collection");
                   return;
                 }
                 final updatedRecipe = recipe.copyWith(collection: true);
                 _viewModel.updateRecipe(updatedRecipe);
                 //Todo: fix, get confirmation from viewmodel
-                showSnackBar(context, "${recipe.name} added");
+                showSnackBar(context, "${recipe.name} added to collection");
               },
               onRemovePress: () {
                 if (!recipe.collection) {
-                  showSnackBar(context, "Recipe is not in collection");
                   return;
                 }
                 final updatedRecipe = recipe.copyWith(collection: false);
                 _viewModel.updateRecipe(updatedRecipe);
-                showSnackBar(context, "${recipe.name} removed");
+                showSnackBar(context, "${recipe.name} removed from collection");
               },
               onDirectionPress: () {
                 Navigator.push(
@@ -100,10 +98,14 @@ class _CollectionManagementScreenState
                           )),
                 );
               },
-              title: recipe.name,
-              description:
-                  '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
-              imageUrl: recipe.imageUrl,
+              onDeletePress: () async {
+                await _viewModel.deleteRecipe(recipe.id!);
+                if (_viewModel.error == null) {
+                  showSnackBar(context, "${recipe.name} deleted");
+                } else {
+                  showSnackBar(context, _viewModel.error!);
+                }
+              },
             );
           }),
     );

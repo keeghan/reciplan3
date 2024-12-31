@@ -98,7 +98,7 @@ class _$ReciplanDatabase extends ReciplanDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `recipe_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `mins` INTEGER NOT NULL, `numIngredients` INTEGER NOT NULL, `direction` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `collection` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `mealType` INTEGER NOT NULL, `userCreated` INTEGER NOT NULL, `videoLink` TEXT NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `recipe_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL, `mins` INTEGER NOT NULL, `numIngredients` INTEGER NOT NULL, `direction` TEXT NOT NULL, `ingredients` TEXT NOT NULL, `imageUrl` TEXT NOT NULL, `collection` INTEGER NOT NULL, `favorite` INTEGER NOT NULL, `mealType` INTEGER NOT NULL, `userCreated` INTEGER NOT NULL, `videoLink` TEXT NOT NULL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `day_table` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `breakfast` INTEGER NOT NULL, `lunch` INTEGER NOT NULL, `dinner` INTEGER NOT NULL, FOREIGN KEY (`breakfast`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY (`lunch`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY (`dinner`) REFERENCES `recipe_table` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
@@ -247,7 +247,7 @@ class _$RecipeDao extends RecipeDao {
   Future<Recipe?> getRecipe(int recipeId) async {
     return _queryAdapter.query('SELECT * FROM recipe_table WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -267,7 +267,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryList(
         'SELECT * FROM recipe_table ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -286,7 +286,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE favorite = 1 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -307,7 +307,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 0 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -328,7 +328,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 1 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -349,7 +349,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 2 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -370,7 +370,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 3 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -391,7 +391,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE collection = 1 ORDER BY id DESC',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -412,7 +412,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 0 AND collection = 1',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -433,7 +433,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 2 AND collection = 1',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -454,7 +454,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 1 AND collection = 1',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -475,7 +475,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE mealType = 3 AND collection = 1',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -502,7 +502,7 @@ class _$RecipeDao extends RecipeDao {
             _sqliteVariablesForDayIDs +
             ')',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -526,7 +526,7 @@ class _$RecipeDao extends RecipeDao {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table      WHERE id = ?1 OR id = ?2 OR id = ?3     ORDER BY CASE id        WHEN ?1 THEN 1        WHEN ?2 THEN 2        WHEN ?3 THEN 3      END',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -704,7 +704,7 @@ class _$DayDao extends DayDao {
     return _queryAdapter.queryListStream(
         'SELECT r.* FROM recipe_table r     INNER JOIN day_table d ON        r.id = d.breakfast OR        r.id = d.lunch OR        r.id = d.dinner     WHERE d.id = ?1     ORDER BY CASE r.id        WHEN d.breakfast THEN 1       WHEN d.lunch THEN 2       WHEN d.dinner THEN 3     END',
         mapper: (Map<String, Object?> row) => Recipe(
-            id: row['id'] as int,
+            id: row['id'] as int?,
             name: row['name'] as String,
             mins: row['mins'] as int,
             numIngredients: row['numIngredients'] as int,
@@ -719,6 +719,24 @@ class _$DayDao extends DayDao {
         arguments: [dayId],
         queryableName: 'recipe_table',
         isView: false);
+  }
+
+  @override
+  Future<void> clearCollection() async {
+    await _queryAdapter.queryNoReturn(
+        'UPDATE recipe_table SET collection = \'false\', favorite = \'false\'');
+  }
+
+  @override
+  Future<void> clearFavorite() async {
+    await _queryAdapter
+        .queryNoReturn('UPDATE recipe_table SET favorite = \'false\'');
+  }
+
+  @override
+  Future<void> clearPlans() async {
+    await _queryAdapter.queryNoReturn(
+        'UPDATE day_table SET breakfast  = \'0\', lunch = \'1\', dinner = \'2\'');
   }
 
   @override

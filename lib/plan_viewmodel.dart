@@ -30,13 +30,10 @@ class PlanViewModel extends ChangeNotifier {
       final stream = _dayRepository.getWeekRecipes();
       stream.listen((weekRecipes) {
         _weekRecipes = weekRecipes;
-        _isLoading = false;
-        notifyListeners();
       });
-      _isLoading = false;
-      notifyListeners();
+      onSuccess();
     } catch (e) {
-      handleError(e);
+      onError(e);
     }
   }
 
@@ -44,16 +41,33 @@ class PlanViewModel extends ChangeNotifier {
   Future<void> addRecipeToDay(int dayId, int mealType, recipeId) async {
     try {
       await _dayRepository.updateDayMeal(dayId, mealType, recipeId);
-      _isSuccess = true;
+      onSuccess();
     } catch (e) {
-      _isSuccess = false;
-      _error = e.toString();
+      onError(e);
     }
   }
 
-  void handleError(dynamic e) {
+  //Clear all Week plans
+  Future<void> clearPlans() async {
+    try {
+      await _dayRepository.clearPlans();
+      onSuccess();
+    } catch (e) {
+      onError(e);
+    }
+  }
+
+  void onError(dynamic e) {
     _isLoading = false;
-    _error = 'Failed to load recipes: $e';
+    _isSuccess = false;
+    _error = 'Error: $e';
+    notifyListeners();
+  }
+
+  void onSuccess() {
+    _error = null;
+    _isLoading = false;
+    _isSuccess = true;
     notifyListeners();
   }
 

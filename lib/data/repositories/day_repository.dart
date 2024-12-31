@@ -58,4 +58,9 @@ class DayRepository {
 
     yield weekRecipes;
   }
+
+  //Clear all Plans
+  Future<void> clearPlans() async {
+    _dayDao.clearPlans();
+  }
 }

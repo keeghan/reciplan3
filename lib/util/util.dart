@@ -80,3 +80,30 @@ Future<Map<String, dynamic>> storeFileInAppDocumentsDirectory(File file) async {
     return {'success': false, 'errorMessage': 'Error storing file: $error'};
   }
 }
+
+void showDeleteConfirmationDialog(BuildContext context, String title, String msg, Function func) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(msg),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              func();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
+}

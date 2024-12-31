@@ -6,13 +6,13 @@ import 'network_image_with_placeholder.dart';
 //Dismissible item representing a recipe in a daily meal plan
 class PlanRecipeItem extends StatelessWidget {
   final int recipeId;
-  final String recipeName;
+  final String name;
   final int mealType;
   final String imageUrl;
 
   const PlanRecipeItem({
     super.key,
-    required this.recipeName,
+    required this.name,
     required this.mealType,
     required this.imageUrl,
     required this.recipeId,
@@ -35,7 +35,9 @@ class PlanRecipeItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  recipeName,
+                  name,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

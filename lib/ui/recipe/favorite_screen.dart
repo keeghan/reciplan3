@@ -67,7 +67,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               final updatedRecipe = recipe.copyWith(favorite: !recipe.favorite);
               _viewModel.updateRecipe(updatedRecipe);
             },
-            title: recipe.name,
+            name: recipe.name,
             isFavorite: recipe.favorite,
             description:
                 '${recipe.mins} mins | ${recipe.numIngredients} ingredients',

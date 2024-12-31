@@ -38,6 +38,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${getDayName(widget.dayId)} Meals'),
+        
       ),
       body: Column(
         children: [
@@ -132,7 +133,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                           },
                           //using -1 to represent no need to display mealtype
                           child: PlanRecipeItem(
-                            recipeName: recipe.name,
+                            name: recipe.name,
                             mealType: -1,
                             imageUrl: recipe.imageUrl,
                             recipeId: recipe.id!,

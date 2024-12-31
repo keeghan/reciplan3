@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../data/entities/recipe.dart';
+import '../../util/util.dart';
 import 'network_image_with_placeholder.dart';
 
 //Widget to be used in collectionManagementScreen to add or
 //remove recipes from Collection
 class ManageCollectionRecipeCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final String imageUrl;
+  final Recipe recipe;
   final VoidCallback onCheckPress;
   final VoidCallback onRemovePress;
   final VoidCallback onDirectionPress;
+  final VoidCallback onDeletePress;
 
   const ManageCollectionRecipeCard({
     super.key,
-    required this.title,
-    required this.description,
-    required this.imageUrl,
+    required this.recipe,
     required this.onCheckPress,
     required this.onRemovePress,
     required this.onDirectionPress,
+    required this.onDeletePress,
   });
 
   @override
@@ -34,40 +34,58 @@ class ManageCollectionRecipeCard extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: ReciplanImage(
-                  imageUrl: imageUrl,
+                  imageUrl: recipe.imageUrl,
                   height: 250,
                   width: double.infinity,
                 ),
               ),
+              //User Recipe Delete Icon
+              if (recipe.userCreated) ...[
+                Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      color: Colors.red,
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => showDeleteConfirmationDialog(
+                        context,
+                        "Confirm Deletion",
+                        "Are you sure you want to delete this recipe?",
+                        onDeletePress,
+                      ),
+                    ))
+              ],
               Positioned(
                 bottom: 8,
                 right: 8,
                 child: Row(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary,
-                        shape: BoxShape.circle,
+                    //recipe.collection is false, show the "add" button otherwise remove
+                    if (!recipe.collection)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.check),
+                          onPressed: onCheckPress,
+                        ),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.check),
-                        onPressed: onCheckPress,
+
+                    if (recipe.collection)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.cancel),
+                          onPressed: onRemovePress,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.cancel),
-                        onPressed: onRemovePress,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -79,12 +97,14 @@ class ManageCollectionRecipeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  recipe.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  description,
+                  '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],

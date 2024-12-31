@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'network_image_with_placeholder.dart';
 
 class FavoriteRecipeCard extends StatelessWidget {
-  final String title;
+  final String name;
   final String description;
   final String imageUrl;
   final bool isFavorite;
@@ -12,7 +12,7 @@ class FavoriteRecipeCard extends StatelessWidget {
 
   const FavoriteRecipeCard(
       {super.key,
-      required this.title,
+      required this.name,
       required this.description,
       required this.imageUrl,
       required this.onDirectionPress,
@@ -30,14 +30,13 @@ class FavoriteRecipeCard extends StatelessWidget {
           Expanded(
             // Wrap Stack in Expanded to take remaining space
             child: Stack(
-              fit: StackFit.expand, // Make Stack fill available space
+              fit: StackFit.expand, 
               children: [
                 ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: ReciplanImage(
                     imageUrl: imageUrl,
-                    fit: BoxFit.cover, // Make image cover available space
+                    fit: BoxFit.cover, 
                     width: double.infinity, height: double.infinity,
                   ),
                 ),
@@ -77,13 +76,11 @@ class FavoriteRecipeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall,
-                  maxLines: 2, // Limit title to 2 lines
-                  overflow:
-                      TextOverflow.ellipsis, // Show ellipsis if text overflows
-                ),
+                Text(name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis
+                    ),
               ],
             ),
           ),
