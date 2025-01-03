@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../util/util.dart';
+import '../../util/utils.dart';
 import 'network_image_with_placeholder.dart';
 
 //Dismissible item representing a recipe in a daily meal plan

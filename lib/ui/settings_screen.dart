@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:reciplan3/data/entities/recipe.dart';
 import 'package:reciplan3/util/storage_service.dart';
 import 'package:reciplan3/util/theme_provider.dart';
-import 'package:reciplan3/util/util.dart';
+import 'package:reciplan3/util/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,11 +57,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Get recipes  database
       final List<Recipe>? recipes = await _viewModel.getUserCreatedRecipes();
       if (recipes == null) {
-        if (mounted) showSnackBar(context, _viewModel.error.toString());
+        if (mounted) MyUtils.showSnackBar(context, _viewModel.error.toString());
         return;
       }
       if (recipes.isEmpty) {
-        if (mounted) showSnackBar(context, 'No local recipes to export');
+        if (mounted) MyUtils.showSnackBar(context, 'No local recipes to export');
         return;
       }
       final String jsonString = jsonEncode(recipes);
@@ -76,16 +76,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final File file = File(filePath);
       await file.writeAsString(jsonString);
       StorageService().copyToDownloads(filePath, fileName);
-      if (mounted) showSnackBar(context, 'Exported to Downloads folder');
+      if (mounted) MyUtils.showSnackBar(context, 'Exported to Downloads folder');
     } catch (e) {
       print(e);
       if (mounted) {
-        showSnackBar(context, 'Error exporting recipes: ${e.toString()}');
+        MyUtils.showSnackBar(context, 'Error exporting recipes: ${e.toString()}');
       }
     }
   }
 
-  //Todo: Work on recipe Import and Export
   Future<void> _importRecipes() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -97,14 +96,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final File file = File(result.files.single.path!);
         final String contents = await file.readAsString();
 
-        final List<dynamic> recipes = jsonDecode(contents);
+        final List<Recipe> recipes = await MyUtils.convertToRecipes(jsonDecode(contents));
         // Import recipes to database
         await _importRecipesToDatabase(recipes);
-        if (mounted) showSnackBar(context, 'Recipes imported successfully');
+          if (mounted) MyUtils.showSnackBar(context, '${recipes.length} recipes imported');
       }
     } catch (e) {
       if (mounted) {
-        showSnackBar(context, 'Error importing recipes: ${e.toString()}');
+        MyUtils.showSnackBar(context, 'Error importing recipes: ${e.toString()}');
       }
     }
   }
@@ -185,12 +184,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await launchUrl(Uri.parse(url));
     } else {
       if (!mounted) return;
-      showSnackBar(context, 'Could not launch $url');
+      MyUtils.showSnackBar(context, 'Could not launch $url');
     }
   }
 
-  Future<void> _importRecipesToDatabase(List<dynamic> recipes) async {
-    // Todo: Implement import logic
+  Future<void> _importRecipesToDatabase(List<Recipe> recipes) async {
+    try {
+      await _viewModel.insertRecipes(recipes);
+    } catch (e) {
+      print(e);
+      if (mounted) {
+        MyUtils.showSnackBar(context, 'Error importing recipes: ${e.toString()}');
+      }
+    }
   }
 
   @override
@@ -266,11 +272,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return fileNameDateTime;
   }
 
-// Future<void> getExportDirectory() async {
-//   try {
-//     Directory downloadDirectory = await getDownloadsDirectory();
-//     print('Downloads folder path: ${downloadDirectory.path}');
-//   } catch (e) {
-//     print('Failed to retrieve downloads folder path $e');
-//   }
 }

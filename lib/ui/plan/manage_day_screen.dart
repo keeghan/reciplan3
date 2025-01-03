@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reciplan3/ui/widgets/plan_recipe_item.dart';
-import 'package:reciplan3/util/util.dart';
+import 'package:reciplan3/util/utils.dart';
 
 import '../../main.dart';
 import '../../plan_viewmodel.dart';
@@ -37,7 +37,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${getDayName(widget.dayId)} Meals'),
+        title: Text('${MyUtils.getDayName(widget.dayId)} Meals'),
         
       ),
       body: Column(
@@ -129,7 +129,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                             String msg = _planViewModel.error == null
                                 ? "${recipe.name} added"
                                 : _planViewModel.error!;
-                            showSnackBar(context, msg);
+                            MyUtils.showSnackBar(context, msg);
                           },
                           //using -1 to represent no need to display mealtype
                           child: PlanRecipeItem(

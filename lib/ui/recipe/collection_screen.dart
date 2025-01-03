@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reciplan3/ui/recipe/directions_screen.dart';
-import 'package:reciplan3/util/util.dart';
+import 'package:reciplan3/util/utils.dart';
 
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
@@ -67,7 +67,7 @@ class _CollectionManagementScreenState extends State<CollectionScreen> {
                 String msg = updatedRecipe.favorite
                     ? 'added to favorite'
                     : 'removed from favorite';
-                showSnackBar(context, msg);
+                MyUtils.showSnackBar(context, msg);
               },
               title: recipe.name,
               isFavorite: recipe.favorite,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
-import '../../util/util.dart';
+import '../../util/utils.dart';
 import '../widgets/manage_collection_recipe_card.dart';
 import 'directions_screen.dart';
 
@@ -79,7 +79,7 @@ class _CollectionManagementScreenState extends State<CollectionManagementScreen>
                 final updatedRecipe = recipe.copyWith(collection: true);
                 _viewModel.updateRecipe(updatedRecipe);
                 //Todo: fix, get confirmation from viewmodel
-                showSnackBar(context, "${recipe.name} added to collection");
+                MyUtils.showSnackBar(context, "${recipe.name} added to collection");
               },
               onRemovePress: () {
                 if (!recipe.collection) {
@@ -87,7 +87,7 @@ class _CollectionManagementScreenState extends State<CollectionManagementScreen>
                 }
                 final updatedRecipe = recipe.copyWith(collection: false);
                 _viewModel.updateRecipe(updatedRecipe);
-                showSnackBar(context, "${recipe.name} removed from collection");
+                MyUtils.showSnackBar(context, "${recipe.name} removed from collection");
               },
               onDirectionPress: () {
                 Navigator.push(
@@ -101,9 +101,9 @@ class _CollectionManagementScreenState extends State<CollectionManagementScreen>
               onDeletePress: () async {
                 await _viewModel.deleteRecipe(recipe.id!);
                 if (_viewModel.error == null) {
-                  showSnackBar(context, "${recipe.name} deleted");
+                  MyUtils.showSnackBar(context, "${recipe.name} deleted");
                 } else {
-                  showSnackBar(context, _viewModel.error!);
+                  MyUtils.showSnackBar(context, _viewModel.error!);
                 }
               },
             );

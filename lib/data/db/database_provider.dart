@@ -2,7 +2,7 @@ import 'package:floor/floor.dart';
 import 'package:reciplan3/util/yt_links.dart';
 
 import 'data.dart';
-import '../../util/util.dart';
+import '../../util/utils.dart';
 import '../daos/day_dao.dart';
 import '../daos/recipe_dao.dart';
 import '../entities/day.dart';

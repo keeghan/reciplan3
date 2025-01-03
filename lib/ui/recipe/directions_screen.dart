@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reciplan3/util/util.dart';
+import 'package:reciplan3/util/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/entities/recipe.dart';

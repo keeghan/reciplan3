@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/entities/recipe.dart';
-import '../../util/util.dart';
+import '../../util/utils.dart';
 import 'network_image_with_placeholder.dart';
 
 //Widget to be used in collectionManagementScreen to add or
@@ -49,7 +49,7 @@ class ManageCollectionRecipeCard extends StatelessWidget {
                     child: IconButton(
                       color: Colors.red,
                       icon: const Icon(Icons.delete),
-                      onPressed: () => showDeleteConfirmationDialog(
+                      onPressed: () => MyUtils.showDeleteConfirmationDialog(
                         context,
                         "Confirm Deletion",
                         "Are you sure you want to delete this recipe?",

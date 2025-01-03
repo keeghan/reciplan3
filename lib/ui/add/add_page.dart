@@ -6,7 +6,7 @@ import 'package:reciplan3/data/entities/recipe.dart';
 
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
-import '../../util/util.dart';
+import '../../util/utils.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -273,24 +273,24 @@ class _AddPageState extends State<AddPage> {
                           _showImageError ||
                           _showIndgredientsError ||
                           _selectedImage == null) {
-                        showSnackBar(context, 'Please fill all required fields.');
+                        MyUtils.showSnackBar(context, 'Please fill all required fields.');
                         return;
                       }
 
                       _newRecipeImage = await _storeRecipeImage();
                       if (_newRecipeImage.startsWith('error')) {
-                        showSnackBar(context, _newRecipeImage);
+                        MyUtils.showSnackBar(context, _newRecipeImage);
                         return;
                       }
                       await _saveRecipe();
 
                       if (!mounted) return;
                       if (_viewModel.error != null) {
-                        showSnackBar(context, _viewModel.error!);
+                        MyUtils.showSnackBar(context, _viewModel.error!);
                       } else {
                         FocusScope.of(context).unfocus();
                         Navigator.of(context).pop();
-                        showSnackBar(context, 'Recipe saved successfully');
+                        MyUtils.showSnackBar(context, 'Recipe saved successfully');
                         _clearFields();
                       }
                       setStateBottomSheet(() {});
@@ -395,7 +395,7 @@ class _AddPageState extends State<AddPage> {
 
   //Take Image selected and save it to AppDocumentsDirectory
   Future<String> _storeRecipeImage() async {
-    Map<String, dynamic> result = await storeFileInAppDocumentsDirectory(_selectedImage!);
+    Map<String, dynamic> result = await MyUtils.storeFileInAppDocumentsDirectory(_selectedImage!);
     if (!result['success']) {
       return 'Error: ${result['errorMessage']}';
     } else {

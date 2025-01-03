@@ -26,6 +26,11 @@ class RecipeRepository {
     await _recipeDao.insertRecipe(recipe);
   }
 
+  // insert multiple recipes
+  Future<void> insertRecipes(List<Recipe> recipes) async {
+    await _recipeDao.insertRecipes(recipes);
+  }
+
   // Update existing recipe
   Future<void> updateRecipe(Recipe recipe) async {
     await _recipeDao.updateRecipe(recipe);

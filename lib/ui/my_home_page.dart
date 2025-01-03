@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reciplan3/util/util.dart';
+import 'package:reciplan3/util/utils.dart';
 
 import 'add/add_page.dart';
 import 'plan/plan_page.dart';

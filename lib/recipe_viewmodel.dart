@@ -84,12 +84,10 @@ class RecipeViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> loadRecipeForDay(
-      int breakfastId, int lunchId, int dinnerId) async {
+  Future<void> loadRecipeForDay(int breakfastId, int lunchId, int dinnerId) async {
     try {
       setLoading();
-      final stream = _recipeRepository.getThreeRecipesInOrder(
-          breakfastId, lunchId, dinnerId);
+      final stream = _recipeRepository.getThreeRecipesInOrder(breakfastId, lunchId, dinnerId);
       stream.listen(
         (recipes) {
           _recipeForDay = recipes;
@@ -156,6 +154,17 @@ class RecipeViewModel extends ChangeNotifier {
       onSuccess();
     } catch (e) {
       onFailure(e);
+    }
+  }
+
+  Future<void> insertRecipes(List<Recipe> recipes) async {
+    try {
+      setLoading();
+      await _recipeRepository.insertRecipes(recipes);
+      onSuccess();
+    } catch (e) {
+      onFailure(e);
+      rethrow;
     }
   }
 

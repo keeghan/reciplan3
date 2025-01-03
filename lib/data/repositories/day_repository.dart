@@ -1,6 +1,6 @@
 import 'package:rxdart/rxdart.dart';
 
-import '../../util/util.dart';
+import '../../util/utils.dart';
 import '../daos/day_dao.dart';
 import '../entities/day.dart';
 import '../entities/recipe.dart';

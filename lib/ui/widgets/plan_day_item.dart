@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:reciplan3/ui/widgets/plan_recipe_item.dart';
 
 import '../../data/entities/recipe.dart';
-import '../../util/util.dart';
+import '../../util/utils.dart';
 
 //Dismissible item representing a recipe in a daily meal plan
 class PlanDayItem extends StatelessWidget {
@@ -29,7 +29,7 @@ class PlanDayItem extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                 child: Text(
-                  getDayName(dayId),
+                  MyUtils.getDayName(dayId),
                   style: TextStyle(
                     fontSize: 20, // Example size, adjust as needed
                     fontWeight: FontWeight.bold,
