@@ -65,6 +65,9 @@ abstract class RecipeDao {
   @Query('SELECT * FROM recipe_table ORDER BY id DESC')
   Future<List<Recipe>> getAllRecipes();
 
+  @Query('SELECT * FROM recipe_table WHERE userCreated = 1 ORDER BY id DESC')
+  Future<List<Recipe>> getUserCreatedRecipes();
+
   @Query('SELECT * FROM recipe_table WHERE favorite = 1 ORDER BY id DESC')
   Stream<List<Recipe>> getFavoriteRecipes();
 

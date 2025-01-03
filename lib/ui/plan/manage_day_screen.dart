@@ -126,7 +126,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                           onTap: () async {
                             await _planViewModel.addRecipeToDay(
                                 widget.dayId, recipe.mealType, recipe.id);
-                            String msg = _planViewModel.isSuccess
+                            String msg = _planViewModel.error == null
                                 ? "${recipe.name} added"
                                 : _planViewModel.error!;
                             showSnackBar(context, msg);

@@ -282,6 +282,25 @@ class _$RecipeDao extends RecipeDao {
   }
 
   @override
+  Future<List<Recipe>> getUserCreatedRecipes() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM recipe_table WHERE userCreated = 1 ORDER BY id DESC',
+        mapper: (Map<String, Object?> row) => Recipe(
+            id: row['id'] as int?,
+            name: row['name'] as String,
+            mins: row['mins'] as int,
+            numIngredients: row['numIngredients'] as int,
+            direction: row['direction'] as String,
+            ingredients: row['ingredients'] as String,
+            imageUrl: row['imageUrl'] as String,
+            collection: (row['collection'] as int) != 0,
+            favorite: (row['favorite'] as int) != 0,
+            mealType: row['mealType'] as int,
+            userCreated: (row['userCreated'] as int) != 0,
+            videoLink: row['videoLink'] as String));
+  }
+
+  @override
   Stream<List<Recipe>> getFavoriteRecipes() {
     return _queryAdapter.queryListStream(
         'SELECT * FROM recipe_table WHERE favorite = 1 ORDER BY id DESC',

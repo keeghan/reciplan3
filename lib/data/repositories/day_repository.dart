@@ -1,3 +1,5 @@
+import 'package:rxdart/rxdart.dart';
+
 import '../../util/util.dart';
 import '../daos/day_dao.dart';
 import '../entities/day.dart';
@@ -45,18 +47,17 @@ class DayRepository {
   }
 
   //Combine all days into one stream
-
-  Stream<Map<int, List<Recipe>>> getWeekRecipes() async* {
-    final futures = List.generate(7, (dayId) {
-      return _dayDao.getRecipesForDay(dayId + 1).first.then((recipes) {
+  Stream<Map<int, List<Recipe>>> getWeekRecipes() {
+    final dayStreams = List.generate(7, (dayId) {
+      return _dayDao.getRecipesForDay(dayId + 1).map((recipes) {
         return MapEntry(dayId + 1, recipes);
       });
     });
 
-    final entries = await Future.wait(futures);
-    final weekRecipes = Map<int, List<Recipe>>.fromEntries(entries);
-
-    yield weekRecipes;
+    return Rx.combineLatest<MapEntry<int, List<Recipe>>, Map<int, List<Recipe>>>(
+      dayStreams,
+      (entries) => Map.fromEntries(entries),
+    );
   }
 
   //Clear all Plans

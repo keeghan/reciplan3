@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  downloadsfolder
   file_selector_windows
   permission_handler_windows
   url_launcher_windows

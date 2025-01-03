@@ -25,6 +25,9 @@ dependencies:
   async: ^2.11.0
   image_picker: ^1.1.2
   numberpicker: ^2.1.2
+  rxdart: ^0.28.0
+  downloadsfolder: ^1.1.0
+
 
 dev_dependencies:
   flutter_test:

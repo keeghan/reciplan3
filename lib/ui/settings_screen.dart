@@ -5,9 +5,15 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:reciplan3/data/entities/recipe.dart';
+import 'package:reciplan3/util/storage_service.dart';
 import 'package:reciplan3/util/theme_provider.dart';
+import 'package:reciplan3/util/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../main.dart';
+import '../recipe_viewmodel.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,6 +24,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late SharedPreferences prefs;
+  late RecipeViewModel _viewModel;
   bool isDarkMode = true;
   bool isHapticsEnabled = true;
   final String version = '1.0.0';
@@ -26,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    _viewModel = locator.get<RecipeViewModel>();
     _loadPreferences();
   }
 
@@ -47,27 +55,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _exportRecipes() async {
     try {
       // Get recipes  database
-      final List<Map<String, dynamic>> recipes =
-          await _getAllUserCreatedRecipes();
-
-      if (recipes.isEmpty) {
-        _showSnackBar('No local recipes to export');
+      final List<Recipe>? recipes = await _viewModel.getUserCreatedRecipes();
+      if (recipes == null) {
+        if (mounted) showSnackBar(context, _viewModel.error.toString());
         return;
       }
-
-      String fileName = await _showExportDialog();
-      if (fileName.isEmpty) return;
-
+      if (recipes.isEmpty) {
+        if (mounted) showSnackBar(context, 'No local recipes to export');
+        return;
+      }
       final String jsonString = jsonEncode(recipes);
 
-      // Get the exported recipes from directory
-      final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/$fileName.json');
+      String fileNamePrefix = await _showExportDialog();
+      if (fileNamePrefix.isEmpty) return; //User cancelled dialog box
+      String fileName = "$fileNamePrefix'_'${getDateTimeString()}";
 
+      final  directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+
+      final File file = File(filePath);
       await file.writeAsString(jsonString);
-      _showSnackBar('Recipes exported successfully');
+      StorageService().copyToDownloads(filePath, fileName);
+      if (mounted) showSnackBar(context, 'Exported to Downloads folder');
     } catch (e) {
-      _showSnackBar('Error exporting recipes: ${e.toString()}');
+      print(e);
+      if (mounted) {
+        showSnackBar(context, 'Error exporting recipes: ${e.toString()}');
+      }
     }
   }
 
@@ -86,10 +100,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final List<dynamic> recipes = jsonDecode(contents);
         // Import recipes to database
         await _importRecipesToDatabase(recipes);
-        _showSnackBar('Recipes imported successfully');
+        if (mounted) showSnackBar(context, 'Recipes imported successfully');
       }
     } catch (e) {
-      _showSnackBar('Error importing recipes: ${e.toString()}');
+      if (mounted) {
+        showSnackBar(context, 'Error importing recipes: ${e.toString()}');
+      }
     }
   }
 
@@ -163,24 +179,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _launchUrl(emailLaunchUri.toString());
   }
 
+  //TODO: fix message
   Future<void> _launchUrl(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {
-      _showSnackBar('Could not launch $url');
+      if (!mounted) return;
+      showSnackBar(context, 'Could not launch $url');
     }
-  }
-
-  void _showSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  Future<List<Map<String, dynamic>>> _getAllUserCreatedRecipes() async {
-    // Todo: Implement get all user Recipes
-    return [];
   }
 
   Future<void> _importRecipesToDatabase(List<dynamic> recipes) async {
@@ -224,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             title: const Text('Export Recipes'),
-            subtitle: const Text('Export your recipes to a file'),
+            subtitle: const Text('Export your added as a .Json file'),
             onTap: _exportRecipes,
           ),
           ListTile(
@@ -250,4 +256,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  String getDateTimeString() {
+    DateTime now = DateTime.now();
+    String fileNameDateTime =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_'
+        '${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-'
+        '${now.second.toString().padLeft(2, '0')}';
+    return fileNameDateTime;
+  }
+
+// Future<void> getExportDirectory() async {
+//   try {
+//     Directory downloadDirectory = await getDownloadsDirectory();
+//     print('Downloads folder path: ${downloadDirectory.path}');
+//   } catch (e) {
+//     print('Failed to retrieve downloads folder path $e');
+//   }
 }

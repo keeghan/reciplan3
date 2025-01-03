@@ -11,29 +11,33 @@ class PlanViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   String? _msg;
-  bool _isSuccess = false;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get msg => _msg;
-  bool get isSuccess => _isSuccess;
 
   Map<int, List<Recipe>> _weekRecipes = {};
   Map<int, List<Recipe>> get weekRecipes => _weekRecipes;
 
-  PlanViewModel(this._dayRepository);
+  StreamSubscription<Map<int, List<Recipe>>>? _weekRecipesSubscription;
 
-  Future<void> loadWeekRecipes() async {
+  PlanViewModel(this._dayRepository) {
+    loadWeekRecipes();
+  }
+
+  void loadWeekRecipes() {
     _isLoading = true;
     notifyListeners();
     try {
-      final stream = _dayRepository.getWeekRecipes();
-      stream.listen((weekRecipes) {
+      _weekRecipesSubscription?.cancel();
+      _weekRecipesSubscription = _dayRepository.getWeekRecipes().listen((weekRecipes) {
         _weekRecipes = weekRecipes;
+        onSuccess();
+      }, onError: (error) {
+        onFailure(error);
       });
-      onSuccess();
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -43,7 +47,7 @@ class PlanViewModel extends ChangeNotifier {
       await _dayRepository.updateDayMeal(dayId, mealType, recipeId);
       onSuccess();
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -53,13 +57,12 @@ class PlanViewModel extends ChangeNotifier {
       await _dayRepository.clearPlans();
       onSuccess();
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
-  void onError(dynamic e) {
+  void onFailure(dynamic e) {
     _isLoading = false;
-    _isSuccess = false;
     _error = 'Error: $e';
     notifyListeners();
   }
@@ -67,13 +70,12 @@ class PlanViewModel extends ChangeNotifier {
   void onSuccess() {
     _error = null;
     _isLoading = false;
-    _isSuccess = true;
     notifyListeners();
   }
 
-  // Clear error
-  void clearError() {
-    _error = null;
-    notifyListeners();
+  @override
+  void dispose() {
+    _weekRecipesSubscription?.cancel();
+    super.dispose();
   }
 }

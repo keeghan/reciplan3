@@ -64,4 +64,22 @@ class Recipe {
       videoLink: videoLink ?? this.videoLink,
     );
   }
+
+  // Convert Recipe object to Map
+  Map<String, dynamic> toJson() {
+    return {
+      'id': null,
+      'name': name,
+      'mins': mins,
+      'numIngredients': numIngredients,
+      'direction': direction,
+      'ingredients': ingredients,
+      'imageUrl': imageUrl,
+      'collection': collection,
+      'favorite': favorite,
+      'mealType': mealType,
+      'userCreated': userCreated,
+      'videoLink': videoLink,
+    };
+  }
 }

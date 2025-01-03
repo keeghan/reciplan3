@@ -21,9 +21,11 @@ class RecipeViewModel extends ChangeNotifier {
 
   List<Recipe> _recipes = [];
   List<Recipe> _recipeForDay = [];
+
   //handle collections and favorites separately
   List<Recipe> _collections = [];
   List<Recipe> _favorites = [];
+  List<Recipe> _userCreatedRecipes = [];
 
   bool _isLoading = false;
   String? _error;
@@ -32,11 +34,17 @@ class RecipeViewModel extends ChangeNotifier {
 
   // Getters
   List<Recipe> get recipes => _recipes;
+
   List<Recipe> get recipeForDay => _recipeForDay;
+
   List<Recipe> get collections => _collections;
+
   List<Recipe> get favorites => _favorites;
 
+  List<Recipe> get userCreatedRecipes => _userCreatedRecipes;
+
   bool get isLoading => _isLoading;
+
   String? get error => _error;
 
   //Loads a list of recipes for various screens
@@ -69,28 +77,30 @@ class RecipeViewModel extends ChangeNotifier {
           _recipes = recipes;
           onSuccess();
         },
-        onError: onError,
+        onError: onFailure,
       );
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
-  Future<void> loadRecipeForDay(int breakfastId, int lunchId, int dinnerId) async {
+  Future<void> loadRecipeForDay(
+      int breakfastId, int lunchId, int dinnerId) async {
     try {
       setLoading();
-      final stream = _recipeRepository.getThreeRecipesInOrder(breakfastId, lunchId, dinnerId);
+      final stream = _recipeRepository.getThreeRecipesInOrder(
+          breakfastId, lunchId, dinnerId);
       stream.listen(
         (recipes) {
           _recipeForDay = recipes;
           onSuccess();
         },
         onError: (e) {
-          onError(e);
+          onFailure(e);
         },
       );
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -104,11 +114,11 @@ class RecipeViewModel extends ChangeNotifier {
           onSuccess();
         },
         onError: (e) {
-          onError(e);
+          onFailure(e);
         },
       );
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -122,11 +132,20 @@ class RecipeViewModel extends ChangeNotifier {
           onSuccess();
         },
         onError: (e) {
-          onError(e);
+          onFailure(e);
         },
       );
     } catch (e) {
-      onError(e);
+      onFailure(e);
+    }
+  }
+
+  Future<List<Recipe>?> getUserCreatedRecipes() async {
+    try {
+      return await _recipeRepository.getUserCreatedRecipes();
+    } catch (e) {
+      onFailure(e);
+      return null;
     }
   }
 
@@ -136,7 +155,7 @@ class RecipeViewModel extends ChangeNotifier {
       await _recipeRepository.createRecipe(recipe);
       onSuccess();
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -147,7 +166,7 @@ class RecipeViewModel extends ChangeNotifier {
       await _recipeRepository.updateRecipe(recipe);
       onSuccess();
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -158,7 +177,7 @@ class RecipeViewModel extends ChangeNotifier {
       await _recipeRepository.deleteRecipeById(id);
       onSuccess();
     } catch (e) {
-      onError(e);
+      onFailure(e);
     }
   }
 
@@ -175,7 +194,7 @@ class RecipeViewModel extends ChangeNotifier {
   }
 
   //Error Handle main
-  void onError(dynamic e) {
+  void onFailure(dynamic e) {
     _isLoading = false;
     _error = 'Error: $e';
     print(e);
@@ -185,7 +204,6 @@ class RecipeViewModel extends ChangeNotifier {
   void onSuccess() {
     _error = null;
     _isLoading = false;
-    print("operation Successful");
     notifyListeners();
   }
 

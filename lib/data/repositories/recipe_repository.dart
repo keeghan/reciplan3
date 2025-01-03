@@ -16,6 +16,11 @@ class RecipeRepository {
     return await _recipeDao.getAllRecipes();
   }
 
+  // Get all user created recipes
+  Future<List<Recipe>> getUserCreatedRecipes() async {
+    return await _recipeDao.getUserCreatedRecipes();
+  }
+
   // Create new recipe
   Future<void> createRecipe(Recipe recipe) async {
     await _recipeDao.insertRecipe(recipe);
