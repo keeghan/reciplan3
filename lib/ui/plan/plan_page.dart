@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../plan_viewmodel.dart';
 import '../widgets/plan_day_item.dart';
-import 'manage_day_screen.dart';
+import 'manage_day_bottom_sheet.dart';
 
 class PlanPage extends StatefulWidget {
-   const PlanPage({super.key});
+  const PlanPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _PlanPageState();
@@ -20,16 +20,6 @@ class _PlanPageState extends State<PlanPage> with WidgetsBindingObserver {
     super.initState();
     _viewModel = locator.get<PlanViewModel>();
     WidgetsBinding.instance.addObserver(this);
-  }
-
-  //Refresh WeekPlans whenever page comes into focus
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      _viewModel.loadWeekRecipes();
-      setState(() {});
-    }
   }
 
   @override
@@ -77,10 +67,7 @@ class _PlanPageState extends State<PlanPage> with WidgetsBindingObserver {
                       dayId: dayId,
                       dayRecipes: recipes,
                       onEditDayPlanPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => ManageDayScreen(dayId: dayId)),
-                        );
+                        showManageDaySheet(context, dayId);
                       },
                     );
                   },
@@ -88,10 +75,6 @@ class _PlanPageState extends State<PlanPage> with WidgetsBindingObserver {
               },
             ),
           ),
-          TextButton(
-            onPressed: () => _viewModel.loadWeekRecipes(),
-            child: const Text("Reload"),
-          )
         ],
       ),
     );
@@ -102,4 +85,24 @@ class _PlanPageState extends State<PlanPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
+  //Show Widget for managing a day's plan
+  void showManageDaySheet(BuildContext context, int dayId) {
+    showModalBottomSheet(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      context: context,
+      builder: (context) {
+        return ManageDaySheet(dayId: dayId);
+      },
+    ).then((_) {
+      _viewModel.loadWeekRecipes();
+    });
+  }
 }
+
+
+
+ // Navigator.push(
+//   context,
+//   MaterialPageRoute(builder: (context) => ManageDayScreen(dayId: dayId)),
+// );

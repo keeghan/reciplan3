@@ -6,17 +6,17 @@ import '../../main.dart';
 import '../../plan_viewmodel.dart';
 import '../../recipe_viewmodel.dart';
 
-//Screen to enable user add recipes to various days
-class ManageDayScreen extends StatefulWidget {
+//BottomModalSheet to enable user add recipes to various days
+class ManageDaySheet extends StatefulWidget {
   final int dayId;
 
-  const ManageDayScreen({super.key, required this.dayId});
+  const ManageDaySheet({super.key, required this.dayId});
 
   @override
-  State<ManageDayScreen> createState() => _ManageDayScreenState();
+  State<ManageDaySheet> createState() => _ManageDaySheetState();
 }
 
-class _ManageDayScreenState extends State<ManageDayScreen> {
+class _ManageDaySheetState extends State<ManageDaySheet> {
   late RecipeViewModel _recipeViewModel;
   late PlanViewModel _planViewModel;
   RecipeType _currentType = RecipeType.breakfastCollection;
@@ -36,12 +36,34 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${MyUtils.getDayName(widget.dayId)} Meals'),
-        
-      ),
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
+          //Handle bar
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: 40,
+              height: 5,
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+
+          //Day title
+          // Text(
+          //   '${MyUtils.getDayName(widget.dayId)} Meals',
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     fontSize: 16,
+          //     fontWeight: FontWeight.bold,
+          //     color: const Color.fromARGB(255, 85, 85, 85),
+          //   ),
+          // ),
+
           // Meal type selection buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -55,9 +77,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                 },
                 style: _currentType == RecipeType.breakfastCollection
                     ? ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                      )
+                        foregroundColor: Colors.white, backgroundColor: Colors.orange)
                     : null,
                 child: const Text('Breakfast'),
               ),
@@ -70,9 +90,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                 },
                 style: _currentType == RecipeType.lunchCollection
                     ? ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                      )
+                        foregroundColor: Colors.white, backgroundColor: Colors.orange)
                     : null,
                 child: const Text('Lunch'),
               ),
@@ -85,19 +103,19 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                 },
                 style: _currentType == RecipeType.dinnerCollection
                     ? ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                      )
+                        foregroundColor: Colors.white, backgroundColor: Colors.orange)
                     : null,
                 child: const Text('Dinner'),
               ),
             ],
           ),
+
           SizedBox(height: 8),
+
           // Recipe list
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: ListenableBuilder(
                 listenable: _recipeViewModel,
                 builder: (context, child) {
@@ -113,8 +131,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
                   final msg = '${_currentType.toString().split('.').last}s';
 
                   if (recipes.isEmpty) {
-                    return Center(
-                        child: Text('Add some $msg to your collection first'));
+                    return Center(child: Text('Add some $msg to your collection first'));
                   }
 
                   return ListView.builder(
@@ -144,6 +161,7 @@ class _ManageDayScreenState extends State<ManageDayScreen> {
               ),
             ),
           ),
+          SizedBox(height: 8)
         ],
       ),
     );

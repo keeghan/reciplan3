@@ -79,3 +79,12 @@ class PlanViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
+
+  // Stream<Map<int, List<Recipe>>> get weekRecipes =>
+  //     _dayRepository.getWeekRecipes().handleError((error) {
+  //       onFailure(error);
+  //       return <int, List<Recipe>>{};
+  //     }).map((data) {
+  //       onSuccess();
+  //       return data;
+  //     });
