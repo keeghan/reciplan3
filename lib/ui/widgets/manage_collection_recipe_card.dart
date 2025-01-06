@@ -53,6 +53,7 @@ class ManageCollectionRecipeCard extends StatelessWidget {
                         context,
                         "Confirm Deletion",
                         "Are you sure you want to delete this recipe?",
+                        'Delete',
                         onDeletePress,
                       ),
                     ))

@@ -28,7 +28,7 @@ class DayIds {
 }
 
 class MyUtils {
- static void showSnackBar(BuildContext context, String message) {
+  static void showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceTint,
@@ -65,7 +65,7 @@ class MyUtils {
     }
   }
 
- static Future<Map<String, dynamic>> storeFileInAppDocumentsDirectory(File file) async {
+  static Future<Map<String, dynamic>> storeFileInAppDocumentsDirectory(File file) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final filename = file.path.split('/').last;
@@ -84,7 +84,8 @@ class MyUtils {
     }
   }
 
- static void showDeleteConfirmationDialog(BuildContext context, String title, String msg, Function func) {
+  static void showDeleteConfirmationDialog(
+      BuildContext context, String title, String msg, String positive, Function func) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -103,7 +104,7 @@ class MyUtils {
                 func();
                 Navigator.of(context).pop();
               },
-              child: const Text('Delete'),
+              child: Text(positive),
             ),
           ],
         );
@@ -111,7 +112,7 @@ class MyUtils {
     );
   }
 
- static Future<List<Recipe>> convertToRecipes(List<dynamic> recipesJson) async {
+  static Future<List<Recipe>> convertToRecipes(List<dynamic> recipesJson) async {
     return recipesJson.map((recipeMap) {
       return Recipe(
           id: recipeMap['id'],

@@ -7,6 +7,7 @@ import 'package:reciplan3/data/entities/recipe.dart';
 import '../../main.dart';
 import '../../recipe_viewmodel.dart';
 import '../../util/utils.dart';
+import '../settings_screen.dart';
 
 class AddPage extends StatefulWidget {
   const AddPage({super.key});
@@ -46,6 +47,21 @@ class _AddPageState extends State<AddPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: ReciplanCustomColors.appBarColor,
+        foregroundColor: Colors.white,
+        title: const Text('Reciplan'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
+              },
+              icon: Icon(Icons.settings))
+        ],
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),

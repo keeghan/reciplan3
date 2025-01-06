@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../main.dart';
 import '../../plan_viewmodel.dart';
+import '../../util/utils.dart';
+import '../settings_screen.dart';
 import '../widgets/plan_day_item.dart';
 import 'manage_day_bottom_sheet.dart';
 
@@ -25,6 +27,28 @@ class _PlanPageState extends State<PlanPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: ReciplanCustomColors.appBarColor,
+        foregroundColor: Colors.white,
+        title: const Text('Reciplan'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              confirmPlanClear(context);
+            },
+            icon: Icon(Icons.clear_all),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+            icon: Icon(Icons.settings),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -98,11 +122,15 @@ class _PlanPageState extends State<PlanPage> with WidgetsBindingObserver {
       _viewModel.loadWeekRecipes();
     });
   }
+
+  //Show confirmation dialog to clear all plans
+  void confirmPlanClear(BuildContext context) {
+    MyUtils.showDeleteConfirmationDialog(
+        context, 'Reset Plans', 'Are you sure you want to clear all plans?', 'Reset', () async {
+      await _viewModel.clearPlans();
+      _viewModel.loadWeekRecipes();
+      if (mounted) MyUtils.showSnackBar(context, 'Plans cleared');
+      setState(() {});
+    });
+  }
 }
-
-
-
- // Navigator.push(
-//   context,
-//   MaterialPageRoute(builder: (context) => ManageDayScreen(dayId: dayId)),
-// );
