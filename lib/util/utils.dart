@@ -2,16 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../data/entities/recipe.dart';
-
-class MealType {
-  static const int breakfast = 0;
-  static const int lunch = 1;
-  static const int dinner = 2;
-  static const int snack = 3;
-  static const int missing = 4;
-}
+import 'package:reciplan3/logic/core/models/meal.dart';
+import 'package:reciplan3/logic/data/entities/recipe.dart';
 
 class ReciplanCustomColors {
   static const appBarColor = Color.fromARGB(255, 5, 91, 8);
@@ -44,7 +36,7 @@ class MyUtils {
   }
 
 //match day with id
-  static getDayName(int dayId) {
+  static String getDayName(int dayId) {
     switch (dayId) {
       case DayIds.sunday:
         return 'Sunday';
@@ -75,8 +67,6 @@ class MyUtils {
       final newFile = File('${directory.path}/$newFilename');
 
       await file.copy(newFile.path);
-      print(newFile.path);
-      print('nnnF');
 
       return {'success': true, 'filePath': newFile.path};
     } catch (error) {
@@ -115,7 +105,7 @@ class MyUtils {
   static Future<List<Recipe>> convertToRecipes(List<dynamic> recipesJson) async {
     return recipesJson.map((recipeMap) {
       return Recipe(
-          id: recipeMap['id'],
+          id: recipeMap['id'] as int?,
           name: recipeMap['name'],
           mins: recipeMap['mins'],
           numIngredients: recipeMap['numIngredients'],
@@ -124,8 +114,8 @@ class MyUtils {
           imageUrl: recipeMap['imageUrl'],
           collection: recipeMap['collection'],
           favorite: recipeMap['favorite'],
-          mealType: recipeMap['mealType'],
-          userCreated: recipeMap['userCreated'],
+          mealType: mealTypeFromDbValue(recipeMap['mealType']).dbValue,
+          userCreated: recipeMap['userCreated'] ?? true,
           videoLink: recipeMap['videoLink']);
     }).toList();
   }

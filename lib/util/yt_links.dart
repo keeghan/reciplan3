@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 class RecipeVideoUrls {
   static const String missing0 = "";
   static const String hausa_Kooko = 'https://youtu.be/hBtaTK_RPYU';
