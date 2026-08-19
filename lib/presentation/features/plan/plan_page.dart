@@ -7,6 +7,7 @@ import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/presentation/features/settings/settings_screen.dart';
 import 'package:reciplan3/logic/plan/meal_plan_cubit.dart';
 import 'package:reciplan3/logic/plan/meal_plan_state.dart';
+import 'grocery_list_screen.dart';
 import 'manage_day_bottom_sheet.dart';
 
 class PlanPage extends StatelessWidget {
@@ -45,6 +46,28 @@ class _PlanView extends StatelessWidget {
           foregroundColor: Colors.white,
           title: const Text('Reciplan'),
           actions: [
+            BlocBuilder<MealPlanCubit, MealPlanState>(
+              buildWhen: (previous, current) =>
+                  previous.weekPlan != current.weekPlan,
+              builder: (context, state) {
+                return IconButton(
+                  tooltip: 'Open grocery list',
+                  onPressed: state.weekPlan == null
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(
+                                weekPlan: state.weekPlan!,
+                              ),
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.shopping_cart_outlined),
+                );
+              },
+            ),
             IconButton(
               onPressed: () => _confirmPlanClear(context),
               icon: const Icon(Icons.clear_all),
@@ -53,7 +76,8 @@ class _PlanView extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()),
                 );
               },
               icon: const Icon(Icons.settings),
@@ -70,7 +94,8 @@ class _PlanView extends StatelessWidget {
                     Text(state.errorMessage!),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => context.read<MealPlanCubit>().watchPlan(),
+                      onPressed: () =>
+                          context.read<MealPlanCubit>().watchPlan(),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -93,7 +118,8 @@ class _PlanView extends StatelessWidget {
                 final dayPlan = weekPlan.days[index];
                 return PlanDayItem(
                   dayPlan: dayPlan,
-                  onEditDayPlanPressed: () => _showManageDaySheet(context, dayPlan.dayId),
+                  onEditDayPlanPressed: () =>
+                      _showManageDaySheet(context, dayPlan.dayId),
                 );
               },
             );
