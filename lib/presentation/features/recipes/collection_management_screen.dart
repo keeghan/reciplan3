@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
-import 'package:reciplan3/presentation/widgets/manage_collection_recipe_card.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/adaptive_recipe_card.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/logic/recipes/recipe_catalog_cubit.dart';
 import 'package:reciplan3/logic/recipes/recipe_catalog_state.dart';
@@ -52,8 +56,6 @@ class _CollectionManagementView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: ReciplanCustomColors.appBarColor,
-          foregroundColor: Colors.white,
           title: Text(title),
         ),
         body: BlocBuilder<RecipeCatalogCubit, RecipeCatalogState>(
@@ -67,36 +69,59 @@ class _CollectionManagementView extends StatelessWidget {
             }
 
             if (state.isEmpty) {
-              return const Center(child: Text('No recipes found.'));
+              return const AppEmptyState(
+                icon: Icons.search_off,
+                title: 'No recipes found',
+                message: 'Add a new recipe and it will appear here.',
+              );
             }
 
-            return ListView.builder(
+            return GridView.builder(
+              padding: const EdgeInsets.all(AppDesignTokens.space16),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 260,
+                childAspectRatio: 0.78,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
               itemCount: state.recipes.length,
               itemBuilder: (context, index) {
                 final recipe = state.recipes[index];
-                return ManageCollectionRecipeCard(
-                  recipe: recipe,
-                  onCheckPress: () {
-                    if (!recipe.collection) {
-                      context.read<RecipeCatalogCubit>().toggleCollection(recipe, true);
-                    }
-                  },
-                  onRemovePress: () {
-                    if (recipe.collection) {
-                      context.read<RecipeCatalogCubit>().toggleCollection(recipe, false);
-                    }
-                  },
-                  onDirectionPress: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DirectionsScreen(recipe: recipe),
-                      ),
-                    );
-                  },
-                  onDeletePress: () {
-                    context.read<RecipeCatalogCubit>().deleteRecipe(recipe);
-                  },
+                return AppEntrance(
+                  index: index,
+                  child: AdaptiveRecipeCard(
+                    recipe: recipe,
+                    onCollection: () {
+                      if (context
+                          .read<AppSettingsCubit>()
+                          .state
+                          .hapticsEnabled) {
+                        HapticFeedback.selectionClick();
+                      }
+                      context.read<RecipeCatalogCubit>().toggleCollection(
+                            recipe,
+                            !recipe.collection,
+                          );
+                    },
+                    onOpen: () {
+                      Navigator.push(
+                        context,
+                        AppRoute.build(
+                            context, DirectionsScreen(recipe: recipe)),
+                      );
+                    },
+                    onDelete: recipe.userCreated
+                        ? () => MyUtils.showDeleteConfirmationDialog(
+                              context,
+                              'Delete recipe?',
+                              'This recipe will be permanently removed.',
+                              'Delete',
+                              () => context
+                                  .read<RecipeCatalogCubit>()
+                                  .deleteRecipe(recipe),
+                            )
+                        : null,
+                  ),
                 );
               },
             );

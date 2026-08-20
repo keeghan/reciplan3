@@ -7,6 +7,8 @@ import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/presentation/features/settings/settings_screen.dart';
 import 'package:reciplan3/logic/plan/meal_plan_cubit.dart';
 import 'package:reciplan3/logic/plan/meal_plan_state.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'grocery_list_screen.dart';
 import 'manage_day_bottom_sheet.dart';
 
@@ -42,9 +44,7 @@ class _PlanView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: ReciplanCustomColors.appBarColor,
-          foregroundColor: Colors.white,
-          title: const Text('Reciplan'),
+          title: const Text('Meal plan'),
           actions: [
             BlocBuilder<MealPlanCubit, MealPlanState>(
               buildWhen: (previous, current) =>
@@ -57,8 +57,9 @@ class _PlanView extends StatelessWidget {
                       : () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(
+                            AppRoute.build(
+                              context,
+                              GroceryListScreen(
                                 weekPlan: state.weekPlan!,
                               ),
                             ),
@@ -68,19 +69,37 @@ class _PlanView extends StatelessWidget {
                 );
               },
             ),
-            IconButton(
-              onPressed: () => _confirmPlanClear(context),
-              icon: const Icon(Icons.clear_all),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()),
-                );
+            PopupMenuButton<_PlanAction>(
+              tooltip: 'More options',
+              onSelected: (action) {
+                switch (action) {
+                  case _PlanAction.reset:
+                    _confirmPlanClear(context);
+                  case _PlanAction.settings:
+                    Navigator.push(
+                      context,
+                      AppRoute.build(context, const SettingsScreen()),
+                    );
+                }
               },
-              icon: const Icon(Icons.settings),
+              itemBuilder: (context) => const [
+                PopupMenuItem(
+                  value: _PlanAction.reset,
+                  child: ListTile(
+                    leading: Icon(Icons.restart_alt),
+                    title: Text('Reset week'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: _PlanAction.settings,
+                  child: ListTile(
+                    leading: Icon(Icons.settings_outlined),
+                    title: Text('Settings'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -113,13 +132,17 @@ class _PlanView extends StatelessWidget {
             }
 
             return ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               itemCount: weekPlan.days.length,
               itemBuilder: (context, index) {
                 final dayPlan = weekPlan.days[index];
-                return PlanDayItem(
-                  dayPlan: dayPlan,
-                  onEditDayPlanPressed: () =>
-                      _showManageDaySheet(context, dayPlan.dayId),
+                return AppEntrance(
+                  index: index,
+                  child: PlanDayItem(
+                    dayPlan: dayPlan,
+                    onEditDayPlanPressed: () =>
+                        _showManageDaySheet(context, dayPlan.dayId),
+                  ),
                 );
               },
             );
@@ -131,10 +154,14 @@ class _PlanView extends StatelessWidget {
 
   void _showManageDaySheet(BuildContext context, int dayId) {
     showModalBottomSheet(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       builder: (context) {
-        return ManageDaySheet(dayId: dayId);
+        return FractionallySizedBox(
+          heightFactor: 0.84,
+          child: ManageDaySheet(dayId: dayId),
+        );
       },
     );
   }
@@ -151,3 +178,5 @@ class _PlanView extends StatelessWidget {
     );
   }
 }
+
+enum _PlanAction { reset, settings }

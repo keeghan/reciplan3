@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
-import 'package:reciplan3/presentation/widgets/collection_recipe_card.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/adaptive_recipe_card.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/logic/recipes/collection_cubit.dart';
 import 'package:reciplan3/logic/recipes/collection_state.dart';
@@ -50,29 +54,45 @@ class _CollectionView extends StatelessWidget {
             }
 
             if (state.isEmpty) {
-              return const Center(child: Text('No recipes in your collection.'));
+              return const AppEmptyState(
+                icon: Icons.menu_book_outlined,
+                title: 'Your collection is ready to grow',
+                message: 'Add recipes from Explore to keep them close at hand.',
+              );
             }
 
-            return ListView.builder(
+            return GridView.builder(
+              padding: const EdgeInsets.all(AppDesignTokens.space16),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 260,
+                childAspectRatio: 0.78,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
               itemCount: state.recipes.length,
               itemBuilder: (context, index) {
                 final recipe = state.recipes[index];
-                return CollectionRecipeCard(
-                  onDirectionPress: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DirectionsScreen(recipe: recipe),
-                      ),
-                    );
-                  },
-                  onFavoriteClicked: () {
-                    context.read<CollectionCubit>().toggleFavorite(recipe);
-                  },
-                  title: recipe.name,
-                  isFavorite: recipe.favorite,
-                  description: '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
-                  imageUrl: recipe.imageUrl,
+                return AppEntrance(
+                  index: index,
+                  child: AdaptiveRecipeCard(
+                    recipe: recipe,
+                    onOpen: () {
+                      Navigator.push(
+                        context,
+                        AppRoute.build(
+                            context, DirectionsScreen(recipe: recipe)),
+                      );
+                    },
+                    onFavorite: () {
+                      if (context
+                          .read<AppSettingsCubit>()
+                          .state
+                          .hapticsEnabled) {
+                        HapticFeedback.selectionClick();
+                      }
+                      context.read<CollectionCubit>().toggleFavorite(recipe);
+                    },
+                  ),
                 );
               },
             );

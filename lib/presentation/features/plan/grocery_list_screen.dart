@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/core/models/week_plan.dart';
 import 'package:reciplan3/logic/data/services/preferences_service.dart';
 import 'package:reciplan3/logic/grocery/grocery_list_cubit.dart';
 import 'package:reciplan3/logic/grocery/grocery_list_state.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'package:reciplan3/util/utils.dart';
 
 class GroceryListScreen extends StatelessWidget {
@@ -42,9 +46,7 @@ class _GroceryListView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: ReciplanCustomColors.appBarColor,
-          foregroundColor: Colors.white,
-          title: const Text('Grocery List'),
+          title: const Text('Grocery list'),
           actions: [
             BlocBuilder<GroceryListCubit, GroceryListState>(
               buildWhen: (previous, current) =>
@@ -71,10 +73,16 @@ class _GroceryListView extends StatelessWidget {
               return const _EmptyGroceryList();
             }
             return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              itemCount: state.groups.length,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              itemCount: state.groups.length + 1,
               itemBuilder: (context, index) {
-                return _GroceryGroupCard(group: state.groups[index]);
+                if (index == 0) {
+                  return _GroceryProgress(state: state);
+                }
+                return AppEntrance(
+                  index: index - 1,
+                  child: _GroceryGroupCard(group: state.groups[index - 1]),
+                );
               },
             );
           },
@@ -89,25 +97,62 @@ class _EmptyGroceryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.shopping_cart_outlined, size: 56),
-            SizedBox(height: 16),
-            Text(
-              'Your grocery list is empty',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Add meals with ingredients to your weekly plan.',
-              textAlign: TextAlign.center,
-            ),
-          ],
+    return const AppEmptyState(
+      icon: Icons.shopping_cart_outlined,
+      title: 'Your grocery list is empty',
+      message: 'Add meals with ingredients to your weekly plan.',
+    );
+  }
+}
+
+class _GroceryProgress extends StatelessWidget {
+  final GroceryListState state;
+
+  const _GroceryProgress({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = state.groups.fold<int>(
+      0,
+      (count, group) => count + group.items.length,
+    );
+    final checked = state.checkedItemKeys.length;
+    final progress = total == 0 ? 0.0 : checked / total;
+    return AppEntrance(
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      checked == total
+                          ? 'All checked off'
+                          : 'Shopping progress',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  Text('$checked of $total'),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TweenAnimationBuilder<double>(
+                tween: Tween(end: progress),
+                duration: AppMotion.duration(context, AppMotion.state),
+                curve: AppMotion.stateCurve,
+                builder: (context, value, _) => LinearProgressIndicator(
+                  value: value,
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -124,7 +169,6 @@ class _GroceryGroupCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -141,14 +185,11 @@ class _GroceryGroupCard extends StatelessWidget {
                   ),
                 ),
                 if (group.plannedCount > 1)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text('Planned ${group.plannedCount} times'),
+                  Chip(
+                    label: Text('${group.plannedCount} meals'),
+                    backgroundColor: colorScheme.secondaryContainer,
+                    side: BorderSide.none,
+                    visualDensity: VisualDensity.compact,
                   ),
               ],
             ),
@@ -160,15 +201,23 @@ class _GroceryGroupCard extends StatelessWidget {
                 return CheckboxListTile(
                   value: isChecked,
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: Text(
-                    item.label,
-                    style: TextStyle(
-                      decoration: isChecked ? TextDecoration.lineThrough : null,
-                      color: isChecked ? colorScheme.onSurfaceVariant : null,
-                    ),
+                  title: AnimatedDefaultTextStyle(
+                    duration: AppMotion.duration(context, AppMotion.state),
+                    curve: AppMotion.stateCurve,
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          decoration:
+                              isChecked ? TextDecoration.lineThrough : null,
+                          color:
+                              isChecked ? colorScheme.onSurfaceVariant : null,
+                        ),
+                    child: Text(item.label),
                   ),
-                  onChanged: (_) =>
-                      context.read<GroceryListCubit>().toggleItem(item.key),
+                  onChanged: (_) {
+                    if (context.read<AppSettingsCubit>().state.hapticsEnabled) {
+                      HapticFeedback.selectionClick();
+                    }
+                    context.read<GroceryListCubit>().toggleItem(item.key);
+                  },
                 );
               },
             ),

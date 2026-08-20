@@ -7,6 +7,7 @@ import 'package:reciplan3/logic/data/services/import_export_service.dart';
 import 'package:reciplan3/logic/data/services/local_image_storage_service.dart';
 import 'package:reciplan3/logic/data/services/preferences_service.dart';
 import 'package:reciplan3/presentation/features/shell/home_shell.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
 import 'bootstrap/app_dependencies.dart';
 import 'settings/app_settings_cubit.dart';
 import 'theme/app_theme_cubit.dart';
@@ -23,10 +24,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<RecipeRepository>.value(value: dependencies.recipeRepository),
-        RepositoryProvider<MealPlanRepository>.value(value: dependencies.mealPlanRepository),
-        RepositoryProvider<PreferencesService>.value(value: dependencies.preferencesService),
-        RepositoryProvider<ImportExportService>.value(value: dependencies.importExportService),
+        RepositoryProvider<RecipeRepository>.value(
+            value: dependencies.recipeRepository),
+        RepositoryProvider<MealPlanRepository>.value(
+            value: dependencies.mealPlanRepository),
+        RepositoryProvider<PreferencesService>.value(
+            value: dependencies.preferencesService),
+        RepositoryProvider<ImportExportService>.value(
+            value: dependencies.importExportService),
         RepositoryProvider<LocalImageStorageService>.value(
           value: dependencies.localImageStorageService,
         ),
@@ -56,19 +61,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final ThemeData lightTheme = ThemeData(
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color.fromARGB(255, 9, 117, 12),
-    secondary: const Color.fromARGB(222, 172, 110, 2),
-  ),
-  useMaterial3: true,
-);
+final ThemeData lightTheme = buildAppTheme(Brightness.light);
 
-final ThemeData darkTheme = ThemeData(
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color.fromARGB(255, 9, 117, 12),
-    secondary: const Color.fromARGB(222, 172, 110, 2),
-    brightness: Brightness.dark,
-  ),
-  useMaterial3: true,
-);
+final ThemeData darkTheme = buildAppTheme(Brightness.dark);

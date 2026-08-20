@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:reciplan3/logic/core/models/day_plan.dart';
 import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/presentation/widgets/plan_recipe_item.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
 
 //Dismissible item representing a recipe in a daily meal plan
 class PlanDayItem extends StatelessWidget {
@@ -16,56 +17,50 @@ class PlanDayItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      padding: EdgeInsets.all(0),
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppDesignTokens.space16),
       child: Column(
         children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                child: Text(
-                  dayPlan.dayName,
-                  style: TextStyle(
-                    fontSize: 20, // Example size, adjust as needed
-                    fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    dayPlan.dayName,
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-              ),
-              Spacer(),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  child: TextButton(
-                    onPressed: onEditDayPlanPressed,
-                    child: Text(
-                      "Edit",
-                      style: TextStyle(
-                        fontSize: 18, // Example size, adjust as needed
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ))
-            ],
+                IconButton.filledTonal(
+                  tooltip: 'Edit ${dayPlan.dayName}',
+                  onPressed: onEditDayPlanPressed,
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+              ],
+            ),
           ),
-          //recipes
           ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: dayPlan.meals.length,
             itemBuilder: (context, index) {
               final meal = dayPlan.meals[index];
               final recipe = meal.recipe;
               return KeyedSubtree(
+                key:
+                    ValueKey('${dayPlan.dayId}-${meal.slot.name}-${recipe.id}'),
                 child: PlanRecipeItem(
                   name: recipe.name,
-                  mealType: recipe.mealTypeEnum == MealType.missing ? null : meal.slot,
+                  mealType: recipe.mealTypeEnum == MealType.missing
+                      ? null
+                      : meal.slot,
                   imageUrl: recipe.imageUrl,
                   recipeId: recipe.id!,
                 ),
               );
             },
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );

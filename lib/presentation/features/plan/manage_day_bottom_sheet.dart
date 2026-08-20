@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/logic/data/repositories/meal_plan_repository.dart';
 import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
@@ -8,6 +10,8 @@ import 'package:reciplan3/presentation/widgets/plan_recipe_item.dart';
 import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/logic/plan/manage_day_cubit.dart';
 import 'package:reciplan3/logic/plan/manage_day_state.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 
 class ManageDaySheet extends StatelessWidget {
   final int dayId;
@@ -49,69 +53,76 @@ class _ManageDayView extends StatelessWidget {
           context.read<ManageDayCubit>().clearAction();
         }
       },
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Container(
-                width: 40,
-                height: 5,
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: AppSectionHeader(
+              title: 'Choose a meal',
+              subtitle: 'Pick a slot, then select a recipe.',
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: MealSlot.values.map((slot) {
-                return BlocBuilder<ManageDayCubit, ManageDayState>(
-                  builder: (context, state) {
-                    final isSelected = state.selectedSlot == slot;
-                    return ElevatedButton(
-                      onPressed: () => context.read<ManageDayCubit>().load(slot),
-                      style: isSelected
-                          ? ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.orange,
-                            )
-                          : null,
-                      child: Text(slot.label),
-                    );
-                  },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: BlocBuilder<ManageDayCubit, ManageDayState>(
+              buildWhen: (previous, current) =>
+                  previous.selectedSlot != current.selectedSlot,
+              builder: (context, state) {
+                return SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<MealSlot>(
+                    showSelectedIcon: false,
+                    segments: [
+                      for (final slot in MealSlot.values)
+                        ButtonSegment(value: slot, label: Text(slot.label)),
+                    ],
+                    selected: {state.selectedSlot},
+                    onSelectionChanged: (selection) =>
+                        context.read<ManageDayCubit>().load(selection.single),
+                  ),
                 );
-              }).toList(),
+              },
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: BlocBuilder<ManageDayCubit, ManageDayState>(
-                  builder: (context, state) {
-                    if (state.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: BlocBuilder<ManageDayCubit, ManageDayState>(
+                builder: (context, state) {
+                  if (state.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                    if (state.errorMessage != null && state.recipes.isEmpty) {
-                      return Center(child: Text(state.errorMessage!));
-                    }
+                  if (state.errorMessage != null && state.recipes.isEmpty) {
+                    return Center(child: Text(state.errorMessage!));
+                  }
 
-                    if (state.isEmpty) {
-                      final label = state.selectedSlot.label.toLowerCase();
-                      return Center(
-                        child: Text('Add some $label recipes to your collection first'),
-                      );
-                    }
+                  if (state.isEmpty) {
+                    final label = state.selectedSlot.label.toLowerCase();
+                    return Center(
+                      child: Text(
+                          'Add some $label recipes to your collection first'),
+                    );
+                  }
 
-                    return ListView.builder(
-                      itemCount: state.recipes.length,
-                      itemBuilder: (context, index) {
-                        final recipe = state.recipes[index];
-                        return InkWell(
+                  return ListView.builder(
+                    itemCount: state.recipes.length,
+                    itemBuilder: (context, index) {
+                      final recipe = state.recipes[index];
+                      return AppEntrance(
+                        index: index,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(
+                            AppDesignTokens.radius12,
+                          ),
                           onTap: () {
+                            if (context
+                                .read<AppSettingsCubit>()
+                                .state
+                                .hapticsEnabled) {
+                              HapticFeedback.selectionClick();
+                            }
                             context.read<ManageDayCubit>().assignRecipe(
                                   dayId: dayId,
                                   recipe: recipe,
@@ -123,16 +134,16 @@ class _ManageDayView extends StatelessWidget {
                             imageUrl: recipe.imageUrl,
                             recipeId: recipe.id!,
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 8),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

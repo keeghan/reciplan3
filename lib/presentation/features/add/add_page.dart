@@ -1,10 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:numberpicker/numberpicker.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/logic/core/models/recipe_draft.dart';
 import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
@@ -12,6 +14,8 @@ import 'package:reciplan3/logic/data/services/local_image_storage_service.dart';
 import 'package:reciplan3/logic/recipes/recipe_editor_cubit.dart';
 import 'package:reciplan3/logic/recipes/recipe_editor_state.dart';
 import 'package:reciplan3/presentation/features/settings/settings_screen.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'package:reciplan3/util/utils.dart';
 
 class AddPage extends StatelessWidget {
@@ -37,17 +41,14 @@ class _AddPageView extends StatefulWidget {
 }
 
 class _AddPageViewState extends State<_AddPageView> {
+  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _directionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _videoLinkController = TextEditingController();
   File? _selectedImage;
-
-  bool _showTitleError = false;
-  bool _showDirectionsError = false;
   bool _showImageError = false;
-  bool _showIngredientsError = false;
-
+  bool _showSaved = false;
   MealType _mealType = MealType.breakfast;
   bool _isFavorite = false;
   bool _isCollection = true;
@@ -74,273 +75,224 @@ class _AddPageViewState extends State<_AddPageView> {
           context.read<RecipeEditorCubit>().clearFeedback();
           return;
         }
-
         if (state.saveSuccess) {
           FocusScope.of(context).unfocus();
-          Navigator.of(context).pop();
-          MyUtils.showSnackBar(context, 'Recipe saved successfully');
+          if (context.read<AppSettingsCubit>().state.hapticsEnabled) {
+            HapticFeedback.mediumImpact();
+          }
           _clearFields();
+          setState(() => _showSaved = true);
+          MyUtils.showSnackBar(context, 'Recipe saved successfully');
           context.read<RecipeEditorCubit>().clearFeedback();
+          Timer(const Duration(milliseconds: 700), () {
+            if (mounted) {
+              setState(() => _showSaved = false);
+            }
+          });
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: ReciplanCustomColors.appBarColor,
-          foregroundColor: Colors.white,
-          title: const Text('Reciplan'),
+          title: const Text('Add recipe'),
           actions: [
             IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                );
-              },
-              icon: const Icon(Icons.settings),
+              tooltip: 'Settings',
+              onPressed: () => Navigator.push(
+                context,
+                AppRoute.build(context, const SettingsScreen()),
+              ),
+              icon: const Icon(Icons.settings_outlined),
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Recipe Title',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    errorText: _showTitleError ? 'Title is required' : null,
-                  ),
-                  onChanged: (value) {
-                    if (_showTitleError && value.trim().isNotEmpty) {
-                      setState(() => _showTitleError = false);
-                    }
-                  },
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+            children: [
+              const AppSectionHeader(
+                title: 'Create something delicious',
+                subtitle:
+                    'Keep the details simple—you can always refine them later.',
+              ),
+              const SizedBox(height: 20),
+              _ImagePicker(
+                image: _selectedImage,
+                showError: _showImageError,
+                onTap: _pickImage,
+              ),
+              const SizedBox(height: 28),
+              const _FormHeading('Basics'),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _titleController,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Recipe title',
+                  prefixIcon: Icon(Icons.restaurant_menu),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _directionController,
-                  decoration: InputDecoration(
-                    labelText: 'Directions',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    errorText: _showDirectionsError ? 'Directions are required' : null,
-                  ),
-                  onChanged: (value) {
-                    if (_showDirectionsError && value.trim().isNotEmpty) {
-                      setState(() => _showDirectionsError = false);
-                    }
-                  },
-                  maxLines: 4,
-                  minLines: 4,
-                ),
-                const SizedBox(height: 24),
-                Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  child: InkWell(
-                    onTap: _pickImage,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: _showImageError ? Border.all(color: Colors.red, width: 2) : null,
-                      ),
-                      child: _selectedImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.add_circle_outline, size: 48),
-                                if (_showImageError)
-                                  const Text(
-                                    'Image required',
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                              ],
-                            ),
+                validator: _required('Title is required'),
+              ),
+              const SizedBox(height: 16),
+              Text('Meal type', style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final type in MealType.values.where(
+                    (type) => type != MealType.missing,
+                  ))
+                    ChoiceChip(
+                      label: Text(type.label),
+                      selected: _mealType == type,
+                      onSelected: (_) => setState(() => _mealType = type),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.schedule),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Cooking time',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
+                  Text('$_selectedDuration min'),
+                ],
+              ),
+              Slider(
+                min: 5,
+                max: 200,
+                divisions: 39,
+                label: '$_selectedDuration minutes',
+                value: _selectedDuration.toDouble(),
+                onChanged: (value) => setState(
+                  () => _selectedDuration = (value / 5).round() * 5,
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => _validateAndProceed(context),
-                  child: const Text('Next'),
+              ),
+              const SizedBox(height: 20),
+              const _FormHeading('Recipe'),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _ingredientsController,
+                textCapitalization: TextCapitalization.sentences,
+                minLines: 5,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  labelText: 'Ingredients',
+                  alignLabelWithHint: true,
+                  hintText: 'Add one ingredient per line',
                 ),
-                const SizedBox(height: 32),
-              ],
-            ),
+                validator: _required('Ingredients are required'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _directionController,
+                textCapitalization: TextCapitalization.sentences,
+                minLines: 6,
+                maxLines: 12,
+                decoration: const InputDecoration(
+                  labelText: 'Directions',
+                  alignLabelWithHint: true,
+                  hintText: 'Describe how to prepare the recipe',
+                ),
+                validator: _required('Directions are required'),
+              ),
+              const SizedBox(height: 28),
+              const _FormHeading('Save and share'),
+              const SizedBox(height: 12),
+              Card(
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      secondary: const Icon(Icons.bookmark_outline),
+                      title: const Text('Add to collection'),
+                      subtitle:
+                          const Text('Make it available in your meal plan'),
+                      value: _isCollection,
+                      onChanged: (value) => setState(() {
+                        _isCollection = value;
+                        if (!value) {
+                          _isFavorite = false;
+                        }
+                      }),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.favorite_border),
+                      title: const Text('Mark as favorite'),
+                      value: _isFavorite,
+                      onChanged: (value) => setState(() {
+                        _isFavorite = value;
+                        if (value) {
+                          _isCollection = true;
+                        }
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _videoLinkController,
+                keyboardType: TextInputType.url,
+                decoration: const InputDecoration(
+                  labelText: 'Video link (optional)',
+                  prefixIcon: Icon(Icons.play_circle_outline),
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: SafeArea(
+          minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: BlocBuilder<RecipeEditorCubit, RecipeEditorState>(
+            buildWhen: (previous, current) =>
+                previous.isSaving != current.isSaving,
+            builder: (context, state) {
+              return FilledButton.icon(
+                onPressed: state.isSaving ? null : () => _submit(context),
+                icon: AnimatedSwitcher(
+                  duration: AppMotion.duration(context, AppMotion.state),
+                  child: _showSaved
+                      ? const Icon(Icons.check, key: ValueKey('saved'))
+                      : state.isSaving
+                          ? const SizedBox.square(
+                              key: ValueKey('saving'),
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.save_outlined,
+                              key: ValueKey('save')),
+                ),
+                label: Text(
+                  _showSaved
+                      ? 'Saved'
+                      : state.isSaving
+                          ? 'Saving…'
+                          : 'Save recipe',
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setBottomSheetState) {
-            return BlocBuilder<RecipeEditorCubit, RecipeEditorState>(
-              builder: (context, state) {
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    16,
-                    16,
-                    MediaQuery.of(context).viewInsets.bottom,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _ingredientsController,
-                              decoration: InputDecoration(
-                                labelText: 'Ingredients List',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                errorText: _showIngredientsError ? 'Ingredients are required' : null,
-                              ),
-                              maxLines: 5,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Column(
-                            children: [
-                              Text('Duration', style: Theme.of(context).textTheme.bodySmall),
-                              NumberPicker(
-                                minValue: 5,
-                                maxValue: 200,
-                                value: _selectedDuration,
-                                onChanged: (value) {
-                                  setState(() => _selectedDuration = value);
-                                  setBottomSheetState(() {});
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: MealType.values
-                            .where((item) => item != MealType.missing)
-                            .map((type) => _buildTypeChip(type, setBottomSheetState))
-                            .toList(),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: Row(
-                          children: [
-                            const Text('Collection: '),
-                            Transform.scale(
-                              scale: 0.8,
-                              child: Switch(
-                                value: _isCollection,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isCollection = value;
-                                    if (!_isCollection) {
-                                      _isFavorite = false;
-                                    }
-                                  });
-                                  setBottomSheetState(() {});
-                                },
-                              ),
-                            ),
-                            const Spacer(),
-                            const Text('Favorite: '),
-                            Transform.scale(
-                              scale: 0.8,
-                              child: Switch(
-                                value: _isFavorite,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isFavorite = value;
-                                    if (_isFavorite) {
-                                      _isCollection = true;
-                                    }
-                                  });
-                                  setBottomSheetState(() {});
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      TextField(
-                        controller: _videoLinkController,
-                        decoration: InputDecoration(
-                          labelText: 'Video Link (Optional)',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 6,
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                        ),
-                        onPressed: state.isSaving ? null : () => _submit(context),
-                        child: Text(
-                          state.isSaving ? 'Saving...' : 'Save',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
+  // Validates non-empty text.
+  FormFieldValidator<String> _required(String message) {
+    return (value) => value == null || value.trim().isEmpty ? message : null;
   }
 
-  Widget _buildTypeChip(MealType type, StateSetter setBottomSheetState) {
-    final isSelected = _mealType == type;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _mealType = type);
-        setBottomSheetState(() {});
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
-          color: isSelected
-              ? Theme.of(context).colorScheme.secondary
-              : Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          type.label.toLowerCase(),
-          style: TextStyle(
-            color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-      ),
-    );
-  }
-
+  // Picks a recipe image.
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -349,37 +301,23 @@ class _AddPageViewState extends State<_AddPageView> {
     }
   }
 
-  void _validateAndProceed(BuildContext context) {
-    setState(() {
-      _showTitleError = _titleController.text.trim().isEmpty;
-      _showDirectionsError = _directionController.text.trim().isEmpty;
-      _showImageError = _selectedImage == null;
-    });
-
-    if (!_showTitleError && !_showDirectionsError && !_showImageError) {
-      _showBottomSheet(context);
-    }
-  }
-
+  // Validates and saves the recipe.
   void _submit(BuildContext context) {
-    setState(() {
-      _showIngredientsError = _ingredientsController.text.trim().isEmpty;
-    });
-
-    if (_showTitleError ||
-        _showDirectionsError ||
-        _showImageError ||
-        _showIngredientsError ||
-        _selectedImage == null) {
-      MyUtils.showSnackBar(context, 'Please fill all required fields.');
+    final formIsValid = _formKey.currentState?.validate() ?? false;
+    setState(() => _showImageError = _selectedImage == null);
+    if (!formIsValid || _selectedImage == null) {
+      MyUtils.showSnackBar(context, 'Please complete the required fields');
       return;
     }
-
+    final ingredients = _ingredientsController.text
+        .split(RegExp(r'\r?\n'))
+        .where((line) => line.trim().isNotEmpty)
+        .toList();
     context.read<RecipeEditorCubit>().saveRecipe(
           RecipeDraft(
             name: _titleController.text.trim(),
             mins: _selectedDuration,
-            numIngredients: _ingredientsController.text.trim().split('\n').length,
+            numIngredients: ingredients.length,
             direction: _directionController.text.trim(),
             ingredients: _ingredientsController.text.trim(),
             imagePath: _selectedImage!.path,
@@ -391,20 +329,122 @@ class _AddPageViewState extends State<_AddPageView> {
         );
   }
 
+  // Clears the completed form.
   void _clearFields() {
+    _formKey.currentState?.reset();
     _titleController.clear();
     _directionController.clear();
     _ingredientsController.clear();
     _videoLinkController.clear();
-    _selectedImage = null;
-    _showTitleError = false;
-    _showDirectionsError = false;
-    _showImageError = false;
-    _showIngredientsError = false;
-    _mealType = MealType.breakfast;
-    _isFavorite = false;
-    _isCollection = true;
-    _selectedDuration = 10;
-    setState(() {});
+    setState(() {
+      _selectedImage = null;
+      _showImageError = false;
+      _mealType = MealType.breakfast;
+      _isFavorite = false;
+      _isCollection = true;
+      _selectedDuration = 10;
+    });
+  }
+}
+
+class _FormHeading extends StatelessWidget {
+  final String title;
+
+  const _FormHeading(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(title, style: Theme.of(context).textTheme.headlineSmall);
+  }
+}
+
+class _ImagePicker extends StatelessWidget {
+  final File? image;
+  final bool showError;
+  final VoidCallback onTap;
+
+  const _ImagePicker({
+    required this.image,
+    required this.showError,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Card(
+            child: InkWell(
+              onTap: onTap,
+              child: AnimatedSwitcher(
+                duration: AppMotion.duration(context, AppMotion.state),
+                child: image == null
+                    ? Container(
+                        key: const ValueKey('empty-image'),
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer,
+                          border: showError
+                              ? Border.all(color: scheme.error, width: 2)
+                              : null,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_photo_alternate_outlined,
+                              size: 44,
+                              color: scheme.onPrimaryContainer,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add a recipe photo',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Stack(
+                        key: ValueKey(image!.path),
+                        fit: StackFit.expand,
+                        children: [
+                          Image.file(image!, fit: BoxFit.cover),
+                          Positioned(
+                            right: 8,
+                            bottom: 8,
+                            child: IconButton.filledTonal(
+                              tooltip: 'Change image',
+                              onPressed: onTap,
+                              icon: const Icon(Icons.edit_outlined),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: AppMotion.duration(context, AppMotion.state),
+          child: showError
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 12),
+                  child: Text(
+                    'A recipe image is required',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: scheme.error),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
   }
 }

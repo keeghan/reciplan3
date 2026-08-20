@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
-import 'package:reciplan3/presentation/widgets/favorite_recipe_card.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
+import 'package:reciplan3/presentation/widgets/adaptive_recipe_card.dart';
+import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/logic/recipes/favorites_cubit.dart';
 import 'package:reciplan3/logic/recipes/favorites_state.dart';
@@ -50,36 +54,46 @@ class _FavoriteView extends StatelessWidget {
             }
 
             if (state.isEmpty) {
-              return const Center(child: Text('No favorite recipes yet.'));
+              return const AppEmptyState(
+                icon: Icons.favorite_border,
+                title: 'No favorites yet',
+                message:
+                    'Tap the heart on a recipe you would love to make again.',
+              );
             }
 
             return GridView.builder(
-              padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.85,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+              padding: const EdgeInsets.all(AppDesignTokens.space16),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 260,
+                childAspectRatio: 0.78,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
               ),
               itemCount: state.recipes.length,
               itemBuilder: (context, index) {
                 final recipe = state.recipes[index];
-                return FavoriteRecipeCard(
-                  onDirectionPress: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DirectionsScreen(recipe: recipe),
-                      ),
-                    );
-                  },
-                  onFavoriteClicked: () {
-                    context.read<FavoritesCubit>().toggleFavorite(recipe);
-                  },
-                  name: recipe.name,
-                  isFavorite: recipe.favorite,
-                  description: '${recipe.mins} mins | ${recipe.numIngredients} ingredients',
-                  imageUrl: recipe.imageUrl,
+                return AppEntrance(
+                  index: index,
+                  child: AdaptiveRecipeCard(
+                    recipe: recipe,
+                    onOpen: () {
+                      Navigator.push(
+                        context,
+                        AppRoute.build(
+                            context, DirectionsScreen(recipe: recipe)),
+                      );
+                    },
+                    onFavorite: () {
+                      if (context
+                          .read<AppSettingsCubit>()
+                          .state
+                          .hapticsEnabled) {
+                        HapticFeedback.selectionClick();
+                      }
+                      context.read<FavoritesCubit>().toggleFavorite(recipe);
+                    },
+                  ),
                 );
               },
             );

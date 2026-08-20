@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/core/models/day_plan.dart';
 import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/logic/core/models/planned_meal.dart';
@@ -12,6 +13,7 @@ import 'package:reciplan3/logic/data/services/preferences_service.dart';
 import 'package:reciplan3/presentation/features/plan/grocery_list_screen.dart';
 import 'package:reciplan3/presentation/features/plan/plan_page.dart';
 import 'package:reciplan3/presentation/features/recipes/explore_screen.dart';
+import 'package:reciplan3/logic/app/app.dart';
 
 import 'support/test_fakes.dart';
 
@@ -28,6 +30,39 @@ void main() {
     expect(find.text('Lunch'), findsOneWidget);
     expect(find.text('Dinner'), findsOneWidget);
     expect(find.text('Snack'), findsOneWidget);
+  });
+
+  testWidgets(
+      'Explore adapts to narrow, wide, dark, and reduced-motion layouts',
+      (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(360, 800);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: const MediaQuery(
+          data: MediaQueryData(
+            size: Size(360, 800),
+            textScaler: TextScaler.linear(2),
+            disableAnimations: true,
+          ),
+          child: ExploreScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Breakfast'), findsOneWidget);
+
+    tester.view.physicalSize = const Size(900, 900);
+    await tester.pumpWidget(
+      MaterialApp(theme: lightTheme, home: const ExploreScreen()),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Dinner'), findsOneWidget);
   });
 
   testWidgets('Grocery list shows grouped checkable ingredients',
@@ -51,24 +86,33 @@ void main() {
     await tester.pumpWidget(
       RepositoryProvider<PreferencesService>.value(
         value: preferencesService,
-        child: MaterialApp(
-          theme: ThemeData(splashFactory: NoSplash.splashFactory),
-          home: GroceryListScreen(weekPlan: weekPlan),
+        child: BlocProvider(
+          create: (_) => AppSettingsCubit(preferencesService),
+          child: MaterialApp(
+            theme: lightTheme.copyWith(splashFactory: NoSplash.splashFactory),
+            home: GroceryListScreen(weekPlan: weekPlan),
+          ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Jollof'), findsOneWidget);
-    expect(find.text('Planned 2 times'), findsOneWidget);
+    expect(find.text('2 meals'), findsOneWidget);
     expect(find.text('Rice'), findsOneWidget);
     expect(find.text('Tomatoes'), findsOneWidget);
 
     await tester.tap(find.text('Rice'));
     await tester.pumpAndSettle();
 
-    final checkedText = tester.widget<Text>(find.text('Rice'));
-    expect(checkedText.style?.decoration, TextDecoration.lineThrough);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is AnimatedDefaultTextStyle &&
+            widget.style.decoration == TextDecoration.lineThrough,
+      ),
+      findsOneWidget,
+    );
     expect(preferencesService.groceryCheckedItemKeys, {'10:0'});
   });
 
@@ -126,7 +170,7 @@ void main() {
     await tester.tap(find.byTooltip('Open grocery list'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Grocery List'), findsOneWidget);
+    expect(find.text('Grocery list'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await dayDao.dispose();
   });
