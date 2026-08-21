@@ -4,13 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:reciplan3/logic/app/settings/app_settings_cubit.dart';
 import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
-import 'package:reciplan3/presentation/theme/app_theme.dart';
 import 'package:reciplan3/presentation/widgets/adaptive_recipe_card.dart';
+import 'package:reciplan3/presentation/widgets/adaptive_recipe_browser.dart';
 import 'package:reciplan3/presentation/widgets/app_components.dart';
 import 'package:reciplan3/util/utils.dart';
 import 'package:reciplan3/logic/recipes/collection_cubit.dart';
 import 'package:reciplan3/logic/recipes/collection_state.dart';
-import 'directions_screen.dart';
 
 class CollectionScreen extends StatelessWidget {
   const CollectionScreen({super.key});
@@ -61,33 +60,17 @@ class _CollectionView extends StatelessWidget {
               );
             }
 
-            return GridView.builder(
-              padding: const EdgeInsets.all(AppDesignTokens.space16),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 260,
-                childAspectRatio: 0.78,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: state.recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = state.recipes[index];
+            return AdaptiveRecipeBrowser(
+              recipes: state.recipes,
+              storageKey: 'collection-recipes',
+              cardBuilder: (context, recipe, onOpen, selected) {
                 return AppEntrance(
-                  index: index,
                   child: AdaptiveRecipeCard(
                     recipe: recipe,
-                    onOpen: () {
-                      Navigator.push(
-                        context,
-                        AppRoute.build(
-                            context, DirectionsScreen(recipe: recipe)),
-                      );
-                    },
+                    selected: selected,
+                    onOpen: onOpen,
                     onFavorite: () {
-                      if (context
-                          .read<AppSettingsCubit>()
-                          .state
-                          .hapticsEnabled) {
+                      if (context.read<AppSettingsCubit>().state.hapticsEnabled) {
                         HapticFeedback.selectionClick();
                       }
                       context.read<CollectionCubit>().toggleFavorite(recipe);

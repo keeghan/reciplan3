@@ -9,17 +9,21 @@ import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/logic/core/models/planned_meal.dart';
 import 'package:reciplan3/logic/core/models/week_plan.dart';
 import 'package:reciplan3/logic/data/repositories/meal_plan_repository.dart';
+import 'package:reciplan3/logic/data/repositories/recipe_repository.dart';
+import 'package:reciplan3/logic/data/services/local_image_storage_service.dart';
 import 'package:reciplan3/logic/data/services/preferences_service.dart';
+import 'package:reciplan3/presentation/features/add/add_page.dart';
 import 'package:reciplan3/presentation/features/plan/grocery_list_screen.dart';
 import 'package:reciplan3/presentation/features/plan/plan_page.dart';
+import 'package:reciplan3/presentation/features/recipes/collection_screen.dart';
 import 'package:reciplan3/presentation/features/recipes/explore_screen.dart';
+import 'package:reciplan3/presentation/features/shell/home_shell.dart';
 import 'package:reciplan3/logic/app/app.dart';
 
 import 'support/test_fakes.dart';
 
 void main() {
-  testWidgets('Explore screen shows meal categories',
-      (WidgetTester tester) async {
+  testWidgets('Explore screen shows meal categories', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: ExploreScreen(),
@@ -32,8 +36,7 @@ void main() {
     expect(find.text('Snack'), findsOneWidget);
   });
 
-  testWidgets(
-      'Explore adapts to narrow, wide, dark, and reduced-motion layouts',
+  testWidgets('Explore adapts to narrow, wide, dark, and reduced-motion layouts',
       (WidgetTester tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(360, 800);
@@ -65,13 +68,128 @@ void main() {
     expect(find.text('Dinner'), findsOneWidget);
   });
 
-  testWidgets('Grocery list shows grouped checkable ingredients',
+  testWidgets('Explore has no overflow at adaptive breakpoints', (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    for (final width in [360.0, 599.0, 600.0, 839.0, 840.0, 941.0, 1280.0, 1506.0]) {
+      tester.view.physicalSize = Size(width, 900);
+      await tester.pumpWidget(
+        MaterialApp(theme: lightTheme, home: const ExploreScreen()),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: 'Failed at $width dp');
+    }
+  });
+
+  testWidgets('Home shell switches navigation without losing destination',
       (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(599, 900);
+    addTearDown(tester.view.reset);
     SharedPreferences.setMockInitialValues({});
-    final preferencesService =
-        PreferencesService(await SharedPreferences.getInstance());
-    final recipe = buildRecipe(id: 10, name: 'Jollof')
-        .copyWith(ingredients: 'Rice\nTomatoes');
+    final dayDao = FakeDayDao();
+    for (var dayId = 1; dayId <= 7; dayId++) {
+      dayDao.emitDay(dayId);
+      dayDao.emitDayRecipes(dayId, const []);
+    }
+    final recipeDao = FakeRecipeDao()
+      ..collectionRecipes = Stream.value(const [])
+      ..favoriteRecipes = Stream.value(const []);
+
+    await tester.pumpWidget(
+      _homeShellTestApp(
+        dayDao: dayDao,
+        recipeDao: recipeDao,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
+
+    await tester.tap(find.text('Plan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Meal plan'), findsOneWidget);
+
+    tester.view.physicalSize = const Size(941, 900);
+    await tester.pumpAndSettle();
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.text('Meal plan'), findsOneWidget);
+
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    expect(find.text('Create something delicious'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await dayDao.dispose();
+  });
+
+  testWidgets('Wide collection uses recipe master detail', (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(941, 900);
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final preferences = PreferencesService(await SharedPreferences.getInstance());
+    final recipe = buildRecipe(id: 7, name: 'Jollof rice');
+    final recipeDao = FakeRecipeDao()..collectionRecipes = Stream.value([recipe]);
+
+    await tester.pumpWidget(
+      RepositoryProvider<RecipeRepository>.value(
+        value: RecipeRepository(recipeDao),
+        child: BlocProvider(
+          create: (_) => AppSettingsCubit(preferences),
+          child: MaterialApp(
+            theme: lightTheme,
+            home: const CollectionScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Select a recipe'), findsOneWidget);
+
+    await tester.tap(find.text('Jollof rice'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ingredients'), findsOneWidget);
+    expect(find.text('Cook it'), findsOneWidget);
+  });
+
+  testWidgets('Add form uses its tablet composition', (WidgetTester tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(941, 1200);
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final preferences = PreferencesService(await SharedPreferences.getInstance());
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<RecipeRepository>.value(
+            value: RecipeRepository(FakeRecipeDao()),
+          ),
+          RepositoryProvider<LocalImageStorageService>.value(
+            value: FakeLocalImageStorageService(),
+          ),
+        ],
+        child: BlocProvider(
+          create: (_) => AppSettingsCubit(preferences),
+          child: MaterialApp(theme: lightTheme, home: const AddPage()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Create something delicious'), findsOneWidget);
+    expect(find.text('Recipe title'), findsOneWidget);
+    expect(find.text('Save recipe'), findsOneWidget);
+  });
+
+  testWidgets('Grocery list shows grouped checkable ingredients', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferencesService = PreferencesService(await SharedPreferences.getInstance());
+    final recipe = buildRecipe(id: 10, name: 'Jollof').copyWith(ingredients: 'Rice\nTomatoes');
     final weekPlan = WeekPlan(days: [
       DayPlan(
         dayId: 1,
@@ -118,8 +236,7 @@ void main() {
 
   testWidgets('Grocery list shows an empty state', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
-    final preferencesService =
-        PreferencesService(await SharedPreferences.getInstance());
+    final preferencesService = PreferencesService(await SharedPreferences.getInstance());
 
     await tester.pumpWidget(
       RepositoryProvider<PreferencesService>.value(
@@ -138,11 +255,9 @@ void main() {
     );
   });
 
-  testWidgets('Plan grocery action opens the grocery list',
-      (WidgetTester tester) async {
+  testWidgets('Plan grocery action opens the grocery list', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
-    final preferencesService =
-        PreferencesService(await SharedPreferences.getInstance());
+    final preferencesService = PreferencesService(await SharedPreferences.getInstance());
     final dayDao = FakeDayDao();
     for (var dayId = 1; dayId <= 7; dayId++) {
       dayDao.emitDay(dayId);
@@ -174,4 +289,37 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await dayDao.dispose();
   });
+}
+
+Widget _homeShellTestApp({
+  required FakeDayDao dayDao,
+  required FakeRecipeDao recipeDao,
+}) {
+  return FutureBuilder<SharedPreferences>(
+    future: SharedPreferences.getInstance(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) return const SizedBox.shrink();
+      final preferences = PreferencesService(snapshot.data!);
+      return MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<RecipeRepository>.value(
+            value: RecipeRepository(recipeDao),
+          ),
+          RepositoryProvider<MealPlanRepository>.value(
+            value: MealPlanRepository(dayDao),
+          ),
+          RepositoryProvider<LocalImageStorageService>.value(
+            value: FakeLocalImageStorageService(),
+          ),
+        ],
+        child: BlocProvider(
+          create: (_) => AppSettingsCubit(preferences),
+          child: MaterialApp(
+            theme: lightTheme,
+            home: const HomeShell(),
+          ),
+        ),
+      );
+    },
+  );
 }

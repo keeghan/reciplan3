@@ -18,6 +18,31 @@ class AppDesignTokens {
   static const radius20 = 20.0;
 }
 
+enum AppWindowClass { compact, medium, expanded }
+
+class AppBreakpoints {
+  static const medium = 600.0;
+  static const expanded = 840.0;
+  static const wide = 1280.0;
+
+  static const readableContent = 760.0;
+  static const standardContent = 1100.0;
+  static const wideContent = 1280.0;
+
+  // Classifies the current app window.
+  static AppWindowClass windowClass(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width >= expanded) return AppWindowClass.expanded;
+    if (width >= medium) return AppWindowClass.medium;
+    return AppWindowClass.compact;
+  }
+
+  // Returns the responsive page gutter.
+  static double gutter(BuildContext context) {
+    return windowClass(context) == AppWindowClass.compact ? 16 : 24;
+  }
+}
+
 class AppMotion {
   static const press = Duration(milliseconds: 120);
   static const state = Duration(milliseconds: 180);
@@ -28,9 +53,7 @@ class AppMotion {
 
   // Returns no duration when reduced motion is requested.
   static Duration duration(BuildContext context, Duration value) {
-    return MediaQuery.maybeOf(context)?.disableAnimations == true
-        ? Duration.zero
-        : value;
+    return MediaQuery.maybeOf(context)?.disableAnimations == true ? Duration.zero : value;
   }
 }
 
@@ -70,8 +93,7 @@ ThemeData buildAppTheme(Brightness brightness) {
     primary: isDark ? const Color(0xFF98D5AA) : AppDesignTokens.primary,
     secondary: isDark ? const Color(0xFFFFC46B) : AppDesignTokens.saffron,
     tertiary: isDark ? const Color(0xFFFFB59A) : AppDesignTokens.terracotta,
-    surface:
-        isDark ? AppDesignTokens.darkSurface : AppDesignTokens.lightSurface,
+    surface: isDark ? AppDesignTokens.darkSurface : AppDesignTokens.lightSurface,
   );
   final base = ThemeData(
     colorScheme: scheme,
@@ -82,19 +104,13 @@ ThemeData buildAppTheme(Brightness brightness) {
   );
   final textTheme = base.textTheme.copyWith(
     displayLarge: base.textTheme.displayLarge?.copyWith(fontFamily: 'Fraunces'),
-    displayMedium:
-        base.textTheme.displayMedium?.copyWith(fontFamily: 'Fraunces'),
+    displayMedium: base.textTheme.displayMedium?.copyWith(fontFamily: 'Fraunces'),
     displaySmall: base.textTheme.displaySmall?.copyWith(fontFamily: 'Fraunces'),
-    headlineLarge:
-        base.textTheme.headlineLarge?.copyWith(fontFamily: 'Fraunces'),
-    headlineMedium:
-        base.textTheme.headlineMedium?.copyWith(fontFamily: 'Fraunces'),
-    headlineSmall:
-        base.textTheme.headlineSmall?.copyWith(fontFamily: 'Fraunces'),
-    titleLarge:
-        base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-    titleMedium:
-        base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+    headlineLarge: base.textTheme.headlineLarge?.copyWith(fontFamily: 'Fraunces'),
+    headlineMedium: base.textTheme.headlineMedium?.copyWith(fontFamily: 'Fraunces'),
+    headlineSmall: base.textTheme.headlineSmall?.copyWith(fontFamily: 'Fraunces'),
+    titleLarge: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
   );
   final rounded16 = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(AppDesignTokens.radius16),
@@ -119,14 +135,24 @@ ThemeData buildAppTheme(Brightness brightness) {
       height: 72,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         return textTheme.labelMedium?.copyWith(
-          color: states.contains(WidgetState.selected)
-              ? scheme.primary
-              : scheme.onSurfaceVariant,
-          fontWeight: states.contains(WidgetState.selected)
-              ? FontWeight.w700
-              : FontWeight.w500,
+          color: states.contains(WidgetState.selected) ? scheme.primary : scheme.onSurfaceVariant,
+          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
         );
       }),
+    ),
+    navigationRailTheme: NavigationRailThemeData(
+      backgroundColor: scheme.surfaceContainer,
+      indicatorColor: scheme.primaryContainer,
+      selectedIconTheme: IconThemeData(color: scheme.primary),
+      selectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+        color: scheme.primary,
+        fontWeight: FontWeight.w700,
+      ),
+      unselectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
+      groupAlignment: -0.72,
+      labelType: NavigationRailLabelType.all,
     ),
     cardTheme: CardThemeData(
       color: scheme.surfaceContainerLow,

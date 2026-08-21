@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:reciplan3/presentation/features/add/add_page.dart';
 import 'package:reciplan3/presentation/features/plan/plan_page.dart';
 import 'package:reciplan3/presentation/features/recipes/recipe_page.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -48,34 +48,62 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) => setState(() => _selectedIndex = index),
-        children: _pages,
+    final isTablet = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
+    final pages = PageView(
+      controller: _pageController,
+      physics: const NeverScrollableScrollPhysics(),
+      onPageChanged: (index) => setState(() => _selectedIndex = index),
+      children: _pages,
+    );
+    final destinations = const [
+      NavigationDestination(
+        icon: Icon(Icons.menu_book_outlined),
+        selectedIcon: Icon(Icons.menu_book),
+        label: 'Recipes',
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book),
-            label: 'Recipes',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month),
-            label: 'Plan',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.add_circle_outline),
-            selectedIcon: Icon(Icons.add_circle),
-            label: 'Add',
-          ),
+      NavigationDestination(
+        icon: Icon(Icons.calendar_month_outlined),
+        selectedIcon: Icon(Icons.calendar_month),
+        label: 'Plan',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.add_circle_outline),
+        selectedIcon: Icon(Icons.add_circle),
+        label: 'Add',
+      ),
+    ];
+
+    return Scaffold(
+      body: Row(
+        children: [
+          if (isTablet) ...[
+            SafeArea(
+              right: false,
+              child: NavigationRail(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: _onItemTapped,
+                destinations: [
+                  for (final destination in destinations)
+                    NavigationRailDestination(
+                      icon: destination.icon,
+                      selectedIcon: destination.selectedIcon,
+                      label: Text(destination.label),
+                    ),
+                ],
+              ),
+            ),
+            const VerticalDivider(width: 1),
+          ],
+          Expanded(key: const ValueKey('primary-content'), child: pages),
         ],
       ),
+      bottomNavigationBar: isTablet
+          ? null
+          : NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _onItemTapped,
+              destinations: destinations,
+            ),
     );
   }
 }

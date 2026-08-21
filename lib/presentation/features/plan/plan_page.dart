@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:reciplan3/logic/core/models/day_plan.dart';
 import 'package:reciplan3/logic/data/repositories/meal_plan_repository.dart';
 import 'package:reciplan3/presentation/widgets/plan_day_item.dart';
 import 'package:reciplan3/util/utils.dart';
@@ -47,8 +48,7 @@ class _PlanView extends StatelessWidget {
           title: const Text('Meal plan'),
           actions: [
             BlocBuilder<MealPlanCubit, MealPlanState>(
-              buildWhen: (previous, current) =>
-                  previous.weekPlan != current.weekPlan,
+              buildWhen: (previous, current) => previous.weekPlan != current.weekPlan,
               builder: (context, state) {
                 return IconButton(
                   tooltip: 'Open grocery list',
@@ -113,8 +113,7 @@ class _PlanView extends StatelessWidget {
                     Text(state.errorMessage!),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () =>
-                          context.read<MealPlanCubit>().watchPlan(),
+                      onPressed: () => context.read<MealPlanCubit>().watchPlan(),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -131,20 +130,56 @@ class _PlanView extends StatelessWidget {
               return const SizedBox.shrink();
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-              itemCount: weekPlan.days.length,
-              itemBuilder: (context, index) {
-                final dayPlan = weekPlan.days[index];
-                return AppEntrance(
-                  index: index,
-                  child: PlanDayItem(
-                    dayPlan: dayPlan,
-                    onEditDayPlanPressed: () =>
-                        _showManageDaySheet(context, dayPlan.dayId),
-                  ),
-                );
-              },
+            if (AppBreakpoints.windowClass(context) == AppWindowClass.compact) {
+              return ListView.builder(
+                key: const PageStorageKey('phone-plan-list'),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                itemCount: weekPlan.days.length,
+                itemBuilder: (context, index) => _buildDay(
+                  context,
+                  weekPlan.days[index],
+                  index,
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              key: const PageStorageKey('tablet-plan-list'),
+              child: AppConstrainedContent(
+                maxWidth: AppBreakpoints.wideContent,
+                padding: EdgeInsets.fromLTRB(
+                  AppBreakpoints.gutter(context),
+                  8,
+                  AppBreakpoints.gutter(context),
+                  32,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columns = constraints.maxWidth >= 1180
+                        ? 3
+                        : constraints.maxWidth >= 720
+                            ? 2
+                            : 1;
+                    const spacing = 16.0;
+                    final width = (constraints.maxWidth - spacing * (columns - 1)) / columns;
+                    return Wrap(
+                      spacing: spacing,
+                      runSpacing: 0,
+                      children: [
+                        for (var index = 0; index < weekPlan.days.length; index++)
+                          SizedBox(
+                            width: width,
+                            child: _buildDay(
+                              context,
+                              weekPlan.days[index],
+                              index,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             );
           },
         ),
@@ -152,7 +187,37 @@ class _PlanView extends StatelessWidget {
     );
   }
 
+  // Builds a responsive day card.
+  Widget _buildDay(BuildContext context, DayPlan dayPlan, int index) {
+    return AppEntrance(
+      index: index,
+      child: PlanDayItem(
+        dayPlan: dayPlan,
+        onEditDayPlanPressed: () => _showManageDaySheet(context, dayPlan.dayId),
+      ),
+    );
+  }
+
   void _showManageDaySheet(BuildContext context, int dayId) {
+    if (MediaQuery.sizeOf(context).width >= AppBreakpoints.medium) {
+      showDialog<void>(
+        context: context,
+        builder: (context) => Dialog(
+          child: SizedBox(
+            width: 720,
+            height: (MediaQuery.sizeOf(context).height - 96).clamp(480, 760).toDouble(),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: ManageDaySheet(
+                dayId: dayId,
+                showCloseButton: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

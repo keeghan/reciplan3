@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:reciplan3/presentation/features/settings/settings_screen.dart';
 import 'package:reciplan3/presentation/theme/app_theme.dart';
+
 import 'collection_screen.dart';
 import 'explore_screen.dart';
 import 'favorite_screen.dart';
@@ -30,6 +30,9 @@ class _RecipePageState extends State<RecipePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    double leftPadding = MediaQuery.sizeOf(context).width < AppBreakpoints.medium
+        ? 12
+        : AppBreakpoints.gutter(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recipes'),
@@ -47,23 +50,28 @@ class _RecipePageState extends State<RecipePage> with TickerProviderStateMixin {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
-          child: TabBar(
-            controller: _tabController,
-            dividerColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(14),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 620),
+              child: TabBar(
+                controller: _tabController,
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                labelColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                padding: EdgeInsets.fromLTRB(leftPadding, 4, 12, 8),
+                tabs: const [
+                  Tab(text: 'Explore'),
+                  Tab(text: 'Collection'),
+                  Tab(text: 'Favorites'),
+                ],
+              ),
             ),
-            labelColor: Theme.of(context).colorScheme.onPrimaryContainer,
-            unselectedLabelColor:
-                Theme.of(context).colorScheme.onSurfaceVariant,
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-            tabs: const [
-              Tab(text: 'Explore'),
-              Tab(text: 'Collection'),
-              Tab(text: 'Favorites'),
-            ],
           ),
         ),
       ),

@@ -107,178 +107,322 @@ class _AddPageViewState extends State<_AddPageView> {
         ),
         body: Form(
           key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-            children: [
-              const AppSectionHeader(
-                title: 'Create something delicious',
-                subtitle:
-                    'Keep the details simple—you can always refine them later.',
-              ),
-              const SizedBox(height: 20),
-              _ImagePicker(
-                image: _selectedImage,
-                showError: _showImageError,
-                onTap: _pickImage,
-              ),
-              const SizedBox(height: 28),
-              const _FormHeading('Basics'),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _titleController,
-                textCapitalization: TextCapitalization.words,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Recipe title',
-                  prefixIcon: Icon(Icons.restaurant_menu),
-                ),
-                validator: _required('Title is required'),
-              ),
-              const SizedBox(height: 16),
-              Text('Meal type', style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final type in MealType.values.where(
-                    (type) => type != MealType.missing,
-                  ))
-                    ChoiceChip(
-                      label: Text(type.label),
-                      selected: _mealType == type,
-                      onSelected: (_) => setState(() => _mealType = type),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  const Icon(Icons.schedule),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Cooking time',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  Text('$_selectedDuration min'),
-                ],
-              ),
-              Slider(
-                min: 5,
-                max: 200,
-                divisions: 39,
-                label: '$_selectedDuration minutes',
-                value: _selectedDuration.toDouble(),
-                onChanged: (value) => setState(
-                  () => _selectedDuration = (value / 5).round() * 5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const _FormHeading('Recipe'),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _ingredientsController,
-                textCapitalization: TextCapitalization.sentences,
-                minLines: 5,
-                maxLines: 8,
-                decoration: const InputDecoration(
-                  labelText: 'Ingredients',
-                  alignLabelWithHint: true,
-                  hintText: 'Add one ingredient per line',
-                ),
-                validator: _required('Ingredients are required'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _directionController,
-                textCapitalization: TextCapitalization.sentences,
-                minLines: 6,
-                maxLines: 12,
-                decoration: const InputDecoration(
-                  labelText: 'Directions',
-                  alignLabelWithHint: true,
-                  hintText: 'Describe how to prepare the recipe',
-                ),
-                validator: _required('Directions are required'),
-              ),
-              const SizedBox(height: 28),
-              const _FormHeading('Save and share'),
-              const SizedBox(height: 12),
-              Card(
-                child: Column(
-                  children: [
-                    SwitchListTile(
-                      secondary: const Icon(Icons.bookmark_outline),
-                      title: const Text('Add to collection'),
-                      subtitle:
-                          const Text('Make it available in your meal plan'),
-                      value: _isCollection,
-                      onChanged: (value) => setState(() {
-                        _isCollection = value;
-                        if (!value) {
-                          _isFavorite = false;
-                        }
-                      }),
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    SwitchListTile(
-                      secondary: const Icon(Icons.favorite_border),
-                      title: const Text('Mark as favorite'),
-                      value: _isFavorite,
-                      onChanged: (value) => setState(() {
-                        _isFavorite = value;
-                        if (value) {
-                          _isCollection = true;
-                        }
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _videoLinkController,
-                keyboardType: TextInputType.url,
-                decoration: const InputDecoration(
-                  labelText: 'Video link (optional)',
-                  prefixIcon: Icon(Icons.play_circle_outline),
-                ),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) => _buildFormContent(context, constraints.maxWidth),
           ),
         ),
         bottomNavigationBar: SafeArea(
-          minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: BlocBuilder<RecipeEditorCubit, RecipeEditorState>(
-            buildWhen: (previous, current) =>
-                previous.isSaving != current.isSaving,
-            builder: (context, state) {
-              return FilledButton.icon(
-                onPressed: state.isSaving ? null : () => _submit(context),
-                icon: AnimatedSwitcher(
-                  duration: AppMotion.duration(context, AppMotion.state),
-                  child: _showSaved
-                      ? const Icon(Icons.check, key: ValueKey('saved'))
-                      : state.isSaving
-                          ? const SizedBox.square(
-                              key: ValueKey('saving'),
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.save_outlined,
-                              key: ValueKey('save')),
+          minimum: EdgeInsets.fromLTRB(
+            AppBreakpoints.gutter(context),
+            8,
+            AppBreakpoints.gutter(context),
+            12,
+          ),
+          child: _buildSaveBar(context),
+        ),
+      ),
+    );
+  }
+
+  // Builds the form for the current window width.
+  Widget _buildFormContent(BuildContext context, double availableWidth) {
+    if (availableWidth < AppBreakpoints.expanded) {
+      return ListView(
+        key: const PageStorageKey('phone-add-form'),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+        children: [
+          ..._introWidgets(),
+          ..._basicWidgets(context),
+          ..._recipeWidgets(includeVideo: false),
+          ..._saveAndShareWidgets(includeLeadingSpace: true),
+          const SizedBox(height: 16),
+          _videoField(),
+        ],
+      );
+    }
+
+    return ListView(
+      key: const PageStorageKey('tablet-add-form'),
+      padding: EdgeInsets.fromLTRB(
+        AppBreakpoints.gutter(context),
+        8,
+        AppBreakpoints.gutter(context),
+        120,
+      ),
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppBreakpoints.standardContent,
+            ),
+            child: Column(
+              children: [
+                const AppSectionHeader(
+                  title: 'Create something delicious',
+                  subtitle: 'Keep the details simple—you can always refine them later.',
                 ),
-                label: Text(
-                  _showSaved
-                      ? 'Saved'
-                      : state.isSaving
-                          ? 'Saving…'
-                          : 'Save recipe',
+                const SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        children: [
+                          _ImagePicker(
+                            image: _selectedImage,
+                            showError: _showImageError,
+                            onTap: _pickImage,
+                          ),
+                          const SizedBox(height: 28),
+                          ..._saveAndShareWidgets(),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      flex: 6,
+                      child: Column(
+                        children: [
+                          ..._basicWidgets(
+                            context,
+                            includeLeadingSpace: false,
+                          ),
+                          ..._recipeWidgets(),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _introWidgets() {
+    return [
+      const AppSectionHeader(
+        title: 'Create something delicious',
+        subtitle: 'Keep the details simple—you can always refine them later.',
+      ),
+      const SizedBox(height: 20),
+      _ImagePicker(
+        image: _selectedImage,
+        showError: _showImageError,
+        onTap: _pickImage,
+      ),
+    ];
+  }
+
+  List<Widget> _basicWidgets(
+    BuildContext context, {
+    bool includeLeadingSpace = true,
+  }) {
+    return [
+      SizedBox(height: includeLeadingSpace ? 28 : 0),
+      const _FormHeading('Basics'),
+      const SizedBox(height: 12),
+      TextFormField(
+        controller: _titleController,
+        textCapitalization: TextCapitalization.words,
+        textInputAction: TextInputAction.next,
+        decoration: const InputDecoration(
+          labelText: 'Recipe title',
+          prefixIcon: Icon(Icons.restaurant_menu),
+        ),
+        validator: _required('Title is required'),
+      ),
+      const SizedBox(height: 16),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          'Meal type',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final type in MealType.values.where(
+              (type) => type != MealType.missing,
+            ))
+              ChoiceChip(
+                label: Text(type.label),
+                selected: _mealType == type,
+                onSelected: (_) => setState(() => _mealType = type),
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 20),
+      Row(
+        children: [
+          const Icon(Icons.schedule),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Cooking time',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Text('$_selectedDuration min'),
+        ],
+      ),
+      Slider(
+        min: 5,
+        max: 200,
+        divisions: 39,
+        label: '$_selectedDuration minutes',
+        value: _selectedDuration.toDouble(),
+        onChanged: (value) => setState(
+          () => _selectedDuration = (value / 5).round() * 5,
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _recipeWidgets({bool includeVideo = true}) {
+    return [
+      const SizedBox(height: 20),
+      const Align(
+        alignment: Alignment.centerLeft,
+        child: _FormHeading('Recipe'),
+      ),
+      const SizedBox(height: 12),
+      TextFormField(
+        controller: _ingredientsController,
+        textCapitalization: TextCapitalization.sentences,
+        minLines: 5,
+        maxLines: 8,
+        decoration: const InputDecoration(
+          labelText: 'Ingredients',
+          alignLabelWithHint: true,
+          hintText: 'Add one ingredient per line',
+        ),
+        validator: _required('Ingredients are required'),
+      ),
+      const SizedBox(height: 16),
+      TextFormField(
+        controller: _directionController,
+        textCapitalization: TextCapitalization.sentences,
+        minLines: 6,
+        maxLines: 12,
+        decoration: const InputDecoration(
+          labelText: 'Directions',
+          alignLabelWithHint: true,
+          hintText: 'Describe how to prepare the recipe',
+        ),
+        validator: _required('Directions are required'),
+      ),
+      if (includeVideo) ...[
+        const SizedBox(height: 16),
+        _videoField(),
+      ],
+    ];
+  }
+
+  Widget _videoField() {
+    return TextFormField(
+      controller: _videoLinkController,
+      keyboardType: TextInputType.url,
+      decoration: const InputDecoration(
+        labelText: 'Video link (optional)',
+        prefixIcon: Icon(Icons.play_circle_outline),
+      ),
+    );
+  }
+
+  List<Widget> _saveAndShareWidgets({bool includeLeadingSpace = false}) {
+    return [
+      if (includeLeadingSpace) const SizedBox(height: 28),
+      const Align(
+        alignment: Alignment.centerLeft,
+        child: _FormHeading('Save and share'),
+      ),
+      const SizedBox(height: 12),
+      Card(
+        child: Column(
+          children: [
+            SwitchListTile(
+              secondary: const Icon(Icons.bookmark_outline),
+              title: const Text('Add to collection'),
+              subtitle: const Text('Make it available in your meal plan'),
+              value: _isCollection,
+              onChanged: (value) => setState(() {
+                _isCollection = value;
+                if (!value) _isFavorite = false;
+              }),
+            ),
+            const Divider(height: 1, indent: 56),
+            SwitchListTile(
+              secondary: const Icon(Icons.favorite_border),
+              title: const Text('Mark as favorite'),
+              value: _isFavorite,
+              onChanged: (value) => setState(() {
+                _isFavorite = value;
+                if (value) _isCollection = true;
+              }),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildSaveBar(BuildContext context) {
+    final isTablet = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
+    final button = SizedBox(
+      width: isTablet ? 360 : double.infinity,
+      child: BlocBuilder<RecipeEditorCubit, RecipeEditorState>(
+        buildWhen: (previous, current) => previous.isSaving != current.isSaving,
+        builder: (context, state) {
+          return FilledButton.icon(
+            onPressed: state.isSaving ? null : () => _submit(context),
+            icon: AnimatedSwitcher(
+              duration: AppMotion.duration(context, AppMotion.state),
+              child: _showSaved
+                  ? const Icon(Icons.check, key: ValueKey('saved'))
+                  : state.isSaving
+                      ? const SizedBox.square(
+                          key: ValueKey('saving'),
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(
+                          Icons.save_outlined,
+                          key: ValueKey('save'),
+                        ),
+            ),
+            label: Text(
+              _showSaved
+                  ? 'Saved'
+                  : state.isSaving
+                      ? 'Saving…'
+                      : 'Save recipe',
+            ),
+          );
+        },
+      ),
+    );
+    if (!isTablet) return button;
+    return SizedBox(
+      height: 52,
+      width: double.infinity,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppBreakpoints.standardContent,
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: Align(alignment: Alignment.centerRight, child: button),
           ),
         ),
       ),
@@ -389,9 +533,7 @@ class _ImagePicker extends StatelessWidget {
                         height: double.infinity,
                         decoration: BoxDecoration(
                           color: scheme.primaryContainer,
-                          border: showError
-                              ? Border.all(color: scheme.error, width: 2)
-                              : null,
+                          border: showError ? Border.all(color: scheme.error, width: 2) : null,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -436,10 +578,7 @@ class _ImagePicker extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8, left: 12),
                   child: Text(
                     'A recipe image is required',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: scheme.error),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.error),
                   ),
                 )
               : const SizedBox.shrink(),

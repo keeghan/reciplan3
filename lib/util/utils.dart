@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:reciplan3/logic/core/models/meal.dart';
 import 'package:reciplan3/logic/data/entities/recipe.dart';
+import 'package:reciplan3/presentation/theme/app_theme.dart';
 
 class DayIds {
   static const int sunday = 1;
@@ -17,11 +18,13 @@ class DayIds {
 
 class MyUtils {
   static void showSnackBar(BuildContext context, String message) {
+    final isTablet = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         duration: const Duration(seconds: 2),
-        margin: const EdgeInsets.all(16),
+        width: isTablet ? 560 : null,
+        margin: isTablet ? null : const EdgeInsets.all(16),
       ),
     );
   }
@@ -48,8 +51,7 @@ class MyUtils {
     }
   }
 
-  static Future<Map<String, dynamic>> storeFileInAppDocumentsDirectory(
-      File file) async {
+  static Future<Map<String, dynamic>> storeFileInAppDocumentsDirectory(File file) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final filename = file.path.split('/').last;
@@ -66,8 +68,8 @@ class MyUtils {
     }
   }
 
-  static void showDeleteConfirmationDialog(BuildContext context, String title,
-      String msg, String positive, Function func) {
+  static void showDeleteConfirmationDialog(
+      BuildContext context, String title, String msg, String positive, Function func) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -98,8 +100,7 @@ class MyUtils {
     );
   }
 
-  static Future<List<Recipe>> convertToRecipes(
-      List<dynamic> recipesJson) async {
+  static Future<List<Recipe>> convertToRecipes(List<dynamic> recipesJson) async {
     return recipesJson.map((recipeMap) {
       return Recipe(
           id: recipeMap['id'] as int?,

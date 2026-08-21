@@ -10,6 +10,7 @@ class AdaptiveRecipeCard extends StatelessWidget {
   final VoidCallback? onFavorite;
   final VoidCallback? onCollection;
   final VoidCallback? onDelete;
+  final bool selected;
 
   const AdaptiveRecipeCard({
     super.key,
@@ -18,12 +19,18 @@ class AdaptiveRecipeCard extends StatelessWidget {
     this.onFavorite,
     this.onCollection,
     this.onDelete,
+    this.selected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Card(
+      color: selected ? scheme.primaryContainer.withValues(alpha: 0.45) : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDesignTokens.radius16),
+        side: selected ? BorderSide(color: scheme.primary, width: 2) : BorderSide.none,
+      ),
       child: InkWell(
         onTap: onOpen,
         child: Column(
@@ -67,15 +74,9 @@ class AdaptiveRecipeCard extends StatelessWidget {
                           ),
                         if (onFavorite != null)
                           _ImageAction(
-                            tooltip: recipe.favorite
-                                ? 'Remove from favorites'
-                                : 'Add to favorites',
-                            icon: recipe.favorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: recipe.favorite
-                                ? const Color(0xFFE15148)
-                                : Colors.white,
+                            tooltip: recipe.favorite ? 'Remove from favorites' : 'Add to favorites',
+                            icon: recipe.favorite ? Icons.favorite : Icons.favorite_border,
+                            color: recipe.favorite ? const Color(0xFFE15148) : Colors.white,
                             onPressed: onFavorite!,
                             animate: true,
                           ),
@@ -87,12 +88,8 @@ class AdaptiveRecipeCard extends StatelessWidget {
                       right: 8,
                       bottom: 8,
                       child: _ImageAction(
-                        tooltip: recipe.collection
-                            ? 'Remove from collection'
-                            : 'Add to collection',
-                        icon: recipe.collection
-                            ? Icons.bookmark
-                            : Icons.bookmark_add_outlined,
+                        tooltip: recipe.collection ? 'Remove from collection' : 'Add to collection',
+                        icon: recipe.collection ? Icons.bookmark : Icons.bookmark_add_outlined,
                         color: scheme.onSecondaryContainer,
                         background: scheme.secondaryContainer,
                         onPressed: onCollection!,
@@ -123,10 +120,9 @@ class AdaptiveRecipeCard extends StatelessWidget {
                           '${recipe.mins} min  •  ${recipe.numIngredients} ingredients',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
                         ),
                       ),
                     ],

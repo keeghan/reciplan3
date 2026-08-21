@@ -1,6 +1,37 @@
 import 'package:flutter/material.dart';
-
 import 'package:reciplan3/presentation/theme/app_theme.dart';
+
+class AppConstrainedContent extends StatelessWidget {
+  final Widget child;
+  final double maxWidth;
+  final EdgeInsetsGeometry? padding;
+  final AlignmentGeometry alignment;
+
+  const AppConstrainedContent({
+    super.key,
+    required this.child,
+    this.maxWidth = AppBreakpoints.standardContent,
+    this.padding,
+    this.alignment = Alignment.topCenter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: alignment,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Padding(
+          padding: padding ??
+              EdgeInsets.symmetric(
+                horizontal: AppBreakpoints.gutter(context),
+              ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
 
 class AppEntrance extends StatefulWidget {
   final Widget child;
@@ -31,14 +62,11 @@ class _AppEntranceState extends State<AppEntrance> {
 
   @override
   Widget build(BuildContext context) {
-    final reducedMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations == true;
+    final reducedMotion = MediaQuery.maybeOf(context)?.disableAnimations == true;
     final delay = reducedMotion ? 0 : (widget.index.clamp(0, 8) * 24);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: _visible ? 1 : 0),
-      duration: reducedMotion
-          ? Duration.zero
-          : AppMotion.entrance + Duration(milliseconds: delay),
+      duration: reducedMotion ? Duration.zero : AppMotion.entrance + Duration(milliseconds: delay),
       curve: AppMotion.entranceCurve,
       builder: (context, value, child) {
         final progress = delay == 0

@@ -15,10 +15,12 @@ import 'package:reciplan3/presentation/widgets/app_components.dart';
 
 class ManageDaySheet extends StatelessWidget {
   final int dayId;
+  final bool showCloseButton;
 
   const ManageDaySheet({
     super.key,
     required this.dayId,
+    this.showCloseButton = false,
   });
 
   @override
@@ -28,16 +30,21 @@ class ManageDaySheet extends StatelessWidget {
         context.read<RecipeRepository>(),
         context.read<MealPlanRepository>(),
       )..load(MealSlot.breakfast),
-      child: _ManageDayView(dayId: dayId),
+      child: _ManageDayView(
+        dayId: dayId,
+        showCloseButton: showCloseButton,
+      ),
     );
   }
 }
 
 class _ManageDayView extends StatelessWidget {
   final int dayId;
+  final bool showCloseButton;
 
   const _ManageDayView({
     required this.dayId,
+    required this.showCloseButton,
   });
 
   @override
@@ -60,13 +67,19 @@ class _ManageDayView extends StatelessWidget {
             child: AppSectionHeader(
               title: 'Choose a meal',
               subtitle: 'Pick a slot, then select a recipe.',
+              trailing: showCloseButton
+                  ? IconButton(
+                      tooltip: 'Close',
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    )
+                  : null,
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: BlocBuilder<ManageDayCubit, ManageDayState>(
-              buildWhen: (previous, current) =>
-                  previous.selectedSlot != current.selectedSlot,
+              buildWhen: (previous, current) => previous.selectedSlot != current.selectedSlot,
               builder: (context, state) {
                 return SizedBox(
                   width: double.infinity,
@@ -101,8 +114,7 @@ class _ManageDayView extends StatelessWidget {
                   if (state.isEmpty) {
                     final label = state.selectedSlot.label.toLowerCase();
                     return Center(
-                      child: Text(
-                          'Add some $label recipes to your collection first'),
+                      child: Text('Add some $label recipes to your collection first'),
                     );
                   }
 
@@ -117,10 +129,7 @@ class _ManageDayView extends StatelessWidget {
                             AppDesignTokens.radius12,
                           ),
                           onTap: () {
-                            if (context
-                                .read<AppSettingsCubit>()
-                                .state
-                                .hapticsEnabled) {
+                            if (context.read<AppSettingsCubit>().state.hapticsEnabled) {
                               HapticFeedback.selectionClick();
                             }
                             context.read<ManageDayCubit>().assignRecipe(

@@ -14,172 +14,289 @@ class DirectionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final hasVideo = recipe.videoLink.trim().isNotEmpty &&
-        Uri.tryParse(recipe.videoLink)?.hasScheme == true;
+    final isExpanded = MediaQuery.sizeOf(context).width >= AppBreakpoints.expanded;
+    if (isExpanded) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(recipe.name),
+          actions: [
+            if (_hasVideo(recipe))
+              IconButton.filled(
+                tooltip: 'Watch recipe video',
+                onPressed: () => _openVideo(context, recipe.videoLink),
+                icon: const Icon(Icons.play_arrow_rounded),
+              ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        body: AppConstrainedContent(
+          maxWidth: AppBreakpoints.wideContent,
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 5,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radius20),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 5,
+                    child: Hero(
+                      tag: 'recipe-${recipe.id}-${recipe.imageUrl}',
+                      child: ReciplanImage(
+                        imageUrl: recipe.imageUrl,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                flex: 7,
+                child: SingleChildScrollView(
+                  child: _RecipeInformation(
+                    recipe: recipe,
+                    showVideoAction: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            expandedHeight: 340,
-            pinned: true,
-            stretch: true,
-            backgroundColor: AppDesignTokens.primary,
-            foregroundColor: Colors.white,
-            titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-            title: Text(recipe.name),
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Hero(
-                    tag: 'recipe-${recipe.id}-${recipe.imageUrl}',
-                    child: ReciplanImage(
-                      imageUrl: recipe.imageUrl,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black26,
-                          Colors.transparent,
-                          Colors.black87,
-                        ],
-                        stops: [0, 0.5, 1],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              if (hasVideo)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: IconButton.filled(
-                    tooltip: 'Watch recipe video',
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppDesignTokens.terracotta,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () => _openVideo(context),
-                    icon: const Icon(Icons.play_arrow_rounded),
-                  ),
-                ),
-            ],
-          ),
+          _RecipeHeroAppBar(recipe: recipe),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
-            sliver: SliverList.list(
-              children: [
-                AppEntrance(
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _MetadataChip(
-                        icon: Icons.schedule,
-                        label: '${recipe.mins} minutes',
-                      ),
-                      _MetadataChip(
-                        icon: Icons.restaurant_menu,
-                        label: '${recipe.numIngredients} ingredients',
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                AppEntrance(
-                  index: 1,
-                  child: _RecipeSection(
-                    title: 'Ingredients',
-                    icon: Icons.shopping_basket_outlined,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final ingredient in _lines(recipe.ingredients))
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 7,
-                                  height: 7,
-                                  margin:
-                                      const EdgeInsets.only(top: 7, right: 12),
-                                  decoration: BoxDecoration(
-                                    color: scheme.secondary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    ingredient,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.copyWith(height: 1.45),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                AppEntrance(
-                  index: 2,
-                  child: _RecipeSection(
-                    title: 'Directions',
-                    icon: Icons.format_list_numbered,
-                    child: Text(
-                      recipe.direction.trim(),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            height: 1.65,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
+            sliver: SliverToBoxAdapter(
+              child: _RecipeInformation(recipe: recipe, showTitle: false),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  // Opens the recipe video externally.
-  Future<void> _openVideo(BuildContext context) async {
-    final launched = await launchUrl(
-      Uri.parse(recipe.videoLink),
-      mode: LaunchMode.externalApplication,
+class RecipeDetailsPane extends StatelessWidget {
+  final Recipe recipe;
+
+  const RecipeDetailsPane({super.key, required this.recipe});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: CustomScrollView(
+        key: ValueKey('recipe-details-${recipe.id}'),
+        slivers: [
+          SliverToBoxAdapter(
+            child: AspectRatio(
+              aspectRatio: 16 / 8,
+              child: ReciplanImage(
+                imageUrl: recipe.imageUrl,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+            sliver: SliverToBoxAdapter(
+              child: _RecipeInformation(
+                recipe: recipe,
+                showVideoAction: true,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
-    if (!launched && context.mounted) {
-      MyUtils.showSnackBar(context, 'Could not open the recipe video');
-    }
   }
+}
 
-  // Splits stored ingredient lines.
-  static List<String> _lines(String value) {
-    return value
-        .split(RegExp(r'\r?\n'))
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .toList();
+class RecipeSelectionPrompt extends StatelessWidget {
+  const RecipeSelectionPrompt({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppEmptyState(
+      icon: Icons.touch_app_outlined,
+      title: 'Select a recipe',
+      message: 'Choose a recipe to see its ingredients and directions.',
+    );
+  }
+}
+
+class _RecipeHeroAppBar extends StatelessWidget {
+  final Recipe recipe;
+
+  const _RecipeHeroAppBar({required this.recipe});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 340,
+      pinned: true,
+      stretch: true,
+      backgroundColor: AppDesignTokens.primary,
+      foregroundColor: Colors.white,
+      titleTextStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+      title: Text(recipe.name),
+      flexibleSpace: FlexibleSpaceBar(
+        collapseMode: CollapseMode.parallax,
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Hero(
+              tag: 'recipe-${recipe.id}-${recipe.imageUrl}',
+              child: ReciplanImage(
+                imageUrl: recipe.imageUrl,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black26, Colors.transparent, Colors.black87],
+                  stops: [0, 0.5, 1],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        if (_hasVideo(recipe))
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton.filled(
+              tooltip: 'Watch recipe video',
+              style: IconButton.styleFrom(
+                backgroundColor: AppDesignTokens.terracotta,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => _openVideo(context, recipe.videoLink),
+              icon: const Icon(Icons.play_arrow_rounded),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _RecipeInformation extends StatelessWidget {
+  final Recipe recipe;
+  final bool showTitle;
+  final bool showVideoAction;
+
+  const _RecipeInformation({
+    required this.recipe,
+    this.showTitle = true,
+    this.showVideoAction = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (showTitle) ...[
+          Text(recipe.name, style: Theme.of(context).textTheme.headlineLarge),
+          const SizedBox(height: 16),
+        ],
+        AppEntrance(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _MetadataChip(
+                icon: Icons.schedule,
+                label: '${recipe.mins} minutes',
+              ),
+              _MetadataChip(
+                icon: Icons.restaurant_menu,
+                label: '${recipe.numIngredients} ingredients',
+              ),
+              if (showVideoAction && _hasVideo(recipe))
+                ActionChip(
+                  avatar: const Icon(Icons.play_arrow_rounded, size: 18),
+                  label: const Text('Watch video'),
+                  onPressed: () => _openVideo(context, recipe.videoLink),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        AppEntrance(
+          index: 1,
+          child: _RecipeSection(
+            title: 'Ingredients',
+            icon: Icons.shopping_basket_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final ingredient in _lines(recipe.ingredients))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          margin: const EdgeInsets.only(top: 7, right: 12),
+                          decoration: BoxDecoration(
+                            color: scheme.secondary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            ingredient,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.45),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        AppEntrance(
+          index: 2,
+          child: _RecipeSection(
+            title: 'Directions',
+            icon: Icons.format_list_numbered,
+            child: Text(
+              recipe.direction.trim(),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    height: 1.65,
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -205,8 +322,11 @@ class _RecipeSection extends StatelessWidget {
   final IconData icon;
   final Widget child;
 
-  const _RecipeSection(
-      {required this.title, required this.icon, required this.child});
+  const _RecipeSection({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -231,4 +351,28 @@ class _RecipeSection extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _hasVideo(Recipe recipe) {
+  return recipe.videoLink.trim().isNotEmpty && Uri.tryParse(recipe.videoLink)?.hasScheme == true;
+}
+
+// Opens a recipe video externally.
+Future<void> _openVideo(BuildContext context, String link) async {
+  final launched = await launchUrl(
+    Uri.parse(link),
+    mode: LaunchMode.externalApplication,
+  );
+  if (!launched && context.mounted) {
+    MyUtils.showSnackBar(context, 'Could not open the recipe video');
+  }
+}
+
+// Splits stored ingredient lines.
+List<String> _lines(String value) {
+  return value
+      .split(RegExp(r'\r?\n'))
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
 }

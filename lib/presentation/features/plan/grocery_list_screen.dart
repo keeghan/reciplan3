@@ -38,8 +38,7 @@ class _GroceryListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<GroceryListCubit, GroceryListState>(
       listenWhen: (previous, current) =>
-          previous.errorMessage != current.errorMessage &&
-          current.errorMessage != null,
+          previous.errorMessage != current.errorMessage && current.errorMessage != null,
       listener: (context, state) {
         MyUtils.showSnackBar(context, state.errorMessage!);
         context.read<GroceryListCubit>().clearError();
@@ -49,14 +48,12 @@ class _GroceryListView extends StatelessWidget {
           title: const Text('Grocery list'),
           actions: [
             BlocBuilder<GroceryListCubit, GroceryListState>(
-              buildWhen: (previous, current) =>
-                  previous.hasCheckedItems != current.hasCheckedItems,
+              buildWhen: (previous, current) => previous.hasCheckedItems != current.hasCheckedItems,
               builder: (context, state) {
                 return IconButton(
                   tooltip: 'Reset checkmarks',
                   onPressed: state.hasCheckedItems
-                      ? () =>
-                          context.read<GroceryListCubit>().resetCheckedItems()
+                      ? () => context.read<GroceryListCubit>().resetCheckedItems()
                       : null,
                   icon: const Icon(Icons.restart_alt),
                 );
@@ -71,6 +68,49 @@ class _GroceryListView extends StatelessWidget {
             }
             if (state.isEmpty) {
               return const _EmptyGroceryList();
+            }
+            final windowClass = AppBreakpoints.windowClass(context);
+            if (windowClass != AppWindowClass.compact) {
+              final columns = windowClass == AppWindowClass.expanded ? 2 : 1;
+              return SingleChildScrollView(
+                child: AppConstrainedContent(
+                  maxWidth: columns == 2
+                      ? AppBreakpoints.standardContent
+                      : AppBreakpoints.readableContent,
+                  padding: EdgeInsets.fromLTRB(
+                    AppBreakpoints.gutter(context),
+                    8,
+                    AppBreakpoints.gutter(context),
+                    32,
+                  ),
+                  child: Column(
+                    children: [
+                      _GroceryProgress(state: state),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          const spacing = 16.0;
+                          final width = (constraints.maxWidth - spacing * (columns - 1)) / columns;
+                          return Wrap(
+                            spacing: spacing,
+                            children: [
+                              for (var index = 0; index < state.groups.length; index++)
+                                SizedBox(
+                                  width: width,
+                                  child: AppEntrance(
+                                    index: index,
+                                    child: _GroceryGroupCard(
+                                      group: state.groups[index],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
             return ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -131,9 +171,7 @@ class _GroceryProgress extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      checked == total
-                          ? 'All checked off'
-                          : 'Shopping progress',
+                      checked == total ? 'All checked off' : 'Shopping progress',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -205,10 +243,8 @@ class _GroceryGroupCard extends StatelessWidget {
                     duration: AppMotion.duration(context, AppMotion.state),
                     curve: AppMotion.stateCurve,
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          decoration:
-                              isChecked ? TextDecoration.lineThrough : null,
-                          color:
-                              isChecked ? colorScheme.onSurfaceVariant : null,
+                          decoration: isChecked ? TextDecoration.lineThrough : null,
+                          color: isChecked ? colorScheme.onSurfaceVariant : null,
                         ),
                     child: Text(item.label),
                   ),
