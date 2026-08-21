@@ -31,6 +31,7 @@ class ExploreScreen extends StatelessWidget {
     },
   ];
 
+  // Caps category width while allowing more columns on tablets.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

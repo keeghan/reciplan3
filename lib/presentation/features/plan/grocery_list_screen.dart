@@ -34,6 +34,7 @@ class GroceryListScreen extends StatelessWidget {
 class _GroceryListView extends StatelessWidget {
   const _GroceryListView();
 
+  // Uses one phone list or constrained tablet group columns.
   @override
   Widget build(BuildContext context) {
     return BlocListener<GroceryListCubit, GroceryListState>(

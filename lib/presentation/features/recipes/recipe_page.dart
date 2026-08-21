@@ -28,6 +28,7 @@ class _RecipePageState extends State<RecipePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // Keeps tabs compact instead of stretching them across tablets.
   @override
   Widget build(BuildContext context) {
     double leftPadding = MediaQuery.sizeOf(context).width < AppBreakpoints.medium

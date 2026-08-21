@@ -30,6 +30,7 @@ class PlanPage extends StatelessWidget {
 class _PlanView extends StatelessWidget {
   const _PlanView();
 
+  // Keeps a phone list while flowing day cards into tablet columns.
   @override
   Widget build(BuildContext context) {
     return BlocListener<MealPlanCubit, MealPlanState>(
@@ -198,6 +199,7 @@ class _PlanView extends StatelessWidget {
     );
   }
 
+  // Opens a dialog on tablets and a bottom sheet on phones.
   void _showManageDaySheet(BuildContext context, int dayId) {
     if (MediaQuery.sizeOf(context).width >= AppBreakpoints.medium) {
       showDialog<void>(
@@ -231,6 +233,7 @@ class _PlanView extends StatelessWidget {
     );
   }
 
+  // Confirms before clearing the current week.
   void _confirmPlanClear(BuildContext context) {
     MyUtils.showDeleteConfirmationDialog(
       context,

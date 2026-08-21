@@ -22,6 +22,7 @@ class AdaptiveRecipeCard extends StatelessWidget {
     this.selected = false,
   });
 
+  // Highlights the card selected in a tablet master pane.
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;

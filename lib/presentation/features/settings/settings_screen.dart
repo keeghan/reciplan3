@@ -110,6 +110,7 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
+  // Keeps settings sections stacked on compact and medium windows.
   List<Widget> _stackedSettings(BuildContext context) {
     return [
       _SettingsSection(
@@ -132,6 +133,7 @@ class _SettingsView extends StatelessWidget {
     ];
   }
 
+  // Builds appearance preferences shared by every layout.
   Widget _appearanceCard(BuildContext context) {
     return Card(
       child: Column(
@@ -165,6 +167,7 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
+  // Builds import and export actions shared by every layout.
   Widget _dataCard(BuildContext context) {
     return Card(
       child: Column(
@@ -187,6 +190,7 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
+  // Builds app information shared by every layout.
   Widget _aboutCard(BuildContext context) {
     return Card(
       child: Column(

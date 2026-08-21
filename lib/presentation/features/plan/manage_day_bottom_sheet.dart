@@ -47,6 +47,7 @@ class _ManageDayView extends StatelessWidget {
     required this.showCloseButton,
   });
 
+  // Adds an explicit close action when hosted in a tablet dialog.
   @override
   Widget build(BuildContext context) {
     return BlocListener<ManageDayCubit, ManageDayState>(

@@ -202,6 +202,7 @@ class _AddPageViewState extends State<_AddPageView> {
     );
   }
 
+  // Builds the phone-only introduction and image picker.
   List<Widget> _introWidgets() {
     return [
       const AppSectionHeader(
@@ -217,6 +218,7 @@ class _AddPageViewState extends State<_AddPageView> {
     ];
   }
 
+  // Shares basic recipe fields between phone and tablet forms.
   List<Widget> _basicWidgets(
     BuildContext context, {
     bool includeLeadingSpace = true,
@@ -288,6 +290,7 @@ class _AddPageViewState extends State<_AddPageView> {
     ];
   }
 
+  // Shares recipe text fields between phone and tablet forms.
   List<Widget> _recipeWidgets({bool includeVideo = true}) {
     return [
       const SizedBox(height: 20),
@@ -328,6 +331,7 @@ class _AddPageViewState extends State<_AddPageView> {
     ];
   }
 
+  // Builds the optional video field once per layout.
   Widget _videoField() {
     return TextFormField(
       controller: _videoLinkController,
@@ -339,6 +343,7 @@ class _AddPageViewState extends State<_AddPageView> {
     );
   }
 
+  // Shares collection controls between phone and tablet forms.
   List<Widget> _saveAndShareWidgets({bool includeLeadingSpace = false}) {
     return [
       if (includeLeadingSpace) const SizedBox(height: 28),
@@ -376,6 +381,7 @@ class _AddPageViewState extends State<_AddPageView> {
     ];
   }
 
+  // Keeps Save full-width on phones and trailing-aligned on tablets.
   Widget _buildSaveBar(BuildContext context) {
     final isTablet = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
     final button = SizedBox(

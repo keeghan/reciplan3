@@ -12,6 +12,7 @@ class DirectionsScreen extends StatelessWidget {
 
   const DirectionsScreen({super.key, required this.recipe});
 
+  // Uses a split detail layout on tablets and a collapsing hero on phones.
   @override
   Widget build(BuildContext context) {
     final isExpanded = MediaQuery.sizeOf(context).width >= AppBreakpoints.expanded;
@@ -90,6 +91,7 @@ class RecipeDetailsPane extends StatelessWidget {
 
   const RecipeDetailsPane({super.key, required this.recipe});
 
+  // Builds details without a Hero for the tablet master-detail pane.
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
@@ -126,6 +128,7 @@ class RecipeDetailsPane extends StatelessWidget {
 class RecipeSelectionPrompt extends StatelessWidget {
   const RecipeSelectionPrompt({super.key});
 
+  // Centers the initial state within the tablet detail pane.
   @override
   Widget build(BuildContext context) {
     return const AppEmptyState(
@@ -141,6 +144,7 @@ class _RecipeHeroAppBar extends StatelessWidget {
 
   const _RecipeHeroAppBar({required this.recipe});
 
+  // Builds the phone-only collapsing recipe header.
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
@@ -211,6 +215,7 @@ class _RecipeInformation extends StatelessWidget {
     this.showVideoAction = false,
   });
 
+  // Shares recipe metadata and sections across routed and embedded details.
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -353,6 +358,7 @@ class _RecipeSection extends StatelessWidget {
   }
 }
 
+// Accepts only non-empty video links with a URI scheme.
 bool _hasVideo(Recipe recipe) {
   return recipe.videoLink.trim().isNotEmpty && Uri.tryParse(recipe.videoLink)?.hasScheme == true;
 }

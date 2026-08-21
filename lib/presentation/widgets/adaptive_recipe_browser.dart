@@ -30,6 +30,7 @@ class _AdaptiveRecipeBrowserState extends State<AdaptiveRecipeBrowser>
     with AutomaticKeepAliveClientMixin {
   int? _selectedRecipeId;
 
+  // Clears a selection that no longer exists in the source list.
   @override
   void didUpdateWidget(covariant AdaptiveRecipeBrowser oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -39,6 +40,7 @@ class _AdaptiveRecipeBrowserState extends State<AdaptiveRecipeBrowser>
     }
   }
 
+  // Uses routed details on phones and master-detail on wide tablets.
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -128,6 +130,7 @@ class _RecipeGrid extends StatelessWidget {
     required this.onOpen,
   });
 
+  // Sizes cards for either the master pane or the full content area.
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(

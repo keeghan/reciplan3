@@ -85,6 +85,7 @@ class AppRoute {
   }
 }
 
+// Builds the complete light or dark Material theme.
 ThemeData buildAppTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
   final scheme = ColorScheme.fromSeed(

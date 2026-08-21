@@ -50,6 +50,7 @@ class AppEntrance extends StatefulWidget {
 class _AppEntranceState extends State<AppEntrance> {
   var _visible = false;
 
+  // Starts the entrance once and skips delay for reduced motion.
   @override
   void initState() {
     super.initState();
@@ -60,6 +61,8 @@ class _AppEntranceState extends State<AppEntrance> {
     });
   }
 
+  // Fades and lifts content with a capped stagger.
+  // Centers content and caps its width on large windows.
   @override
   Widget build(BuildContext context) {
     final reducedMotion = MediaQuery.maybeOf(context)?.disableAnimations == true;

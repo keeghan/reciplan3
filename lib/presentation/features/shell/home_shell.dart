@@ -33,6 +33,7 @@ class _HomeShellState extends State<HomeShell> {
     super.dispose();
   }
 
+  // Moves between persistent pages with reduced-motion support.
   void _onItemTapped(int index) {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
     if (reduceMotion) {
@@ -46,6 +47,7 @@ class _HomeShellState extends State<HomeShell> {
     }
   }
 
+  // Swaps bottom navigation for a rail at tablet widths.
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
