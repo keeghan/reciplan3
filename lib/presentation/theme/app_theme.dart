@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 class AppDesignTokens {
   static const primary = Color(0xFF2F6B45);
-  static const saffron = Color(0xFFD59624);
+  static const saffron = Color(0xFFE08A1E);
   static const terracotta = Color(0xFFB85C38);
   static const lightSurface = Color(0xFFFFF9F1);
-  static const darkSurface = Color(0xFF121712);
+  static const darkSurface = Color(0xFF090909);
+  static const darkSurfaceLow = Color(0xFF111111);
+  static const darkSurfaceContainer = Color(0xFF171717);
+  static const darkSurfaceHigh = Color(0xFF202020);
 
   static const space8 = 8.0;
   static const space12 = 12.0;
@@ -88,14 +91,27 @@ class AppRoute {
 // Builds the complete light or dark Material theme.
 ThemeData buildAppTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
-  final scheme = ColorScheme.fromSeed(
+  final seededScheme = ColorScheme.fromSeed(
     seedColor: AppDesignTokens.primary,
     brightness: brightness,
     primary: isDark ? const Color(0xFF98D5AA) : AppDesignTokens.primary,
-    secondary: isDark ? const Color(0xFFFFC46B) : AppDesignTokens.saffron,
+    secondary: isDark ? const Color(0xFFFFB45E) : AppDesignTokens.saffron,
     tertiary: isDark ? const Color(0xFFFFB59A) : AppDesignTokens.terracotta,
     surface: isDark ? AppDesignTokens.darkSurface : AppDesignTokens.lightSurface,
   );
+  final scheme = isDark
+      ? seededScheme.copyWith(
+          surface: AppDesignTokens.darkSurface,
+          surfaceDim: const Color(0xFF070707),
+          surfaceBright: const Color(0xFF292929),
+          surfaceContainerLowest: const Color(0xFF050505),
+          surfaceContainerLow: AppDesignTokens.darkSurfaceLow,
+          surfaceContainer: AppDesignTokens.darkSurfaceContainer,
+          surfaceContainerHigh: AppDesignTokens.darkSurfaceHigh,
+          surfaceContainerHighest: const Color(0xFF282828),
+          outlineVariant: const Color(0xFF3A3A3A),
+        )
+      : seededScheme;
   final base = ThemeData(
     colorScheme: scheme,
     brightness: brightness,
@@ -132,21 +148,23 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: scheme.surfaceContainer,
-      indicatorColor: scheme.primaryContainer,
+      indicatorColor: scheme.secondaryContainer,
       height: 72,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         return textTheme.labelMedium?.copyWith(
-          color: states.contains(WidgetState.selected) ? scheme.primary : scheme.onSurfaceVariant,
+          color: states.contains(WidgetState.selected)
+              ? scheme.onSecondaryContainer
+              : scheme.onSurfaceVariant,
           fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
         );
       }),
     ),
     navigationRailTheme: NavigationRailThemeData(
       backgroundColor: scheme.surfaceContainer,
-      indicatorColor: scheme.primaryContainer,
-      selectedIconTheme: IconThemeData(color: scheme.primary),
+      indicatorColor: scheme.secondaryContainer,
+      selectedIconTheme: IconThemeData(color: scheme.onSecondaryContainer),
       selectedLabelTextStyle: textTheme.labelMedium?.copyWith(
-        color: scheme.primary,
+        color: scheme.secondary,
         fontWeight: FontWeight.w700,
       ),
       unselectedLabelTextStyle: textTheme.labelMedium?.copyWith(
@@ -176,7 +194,7 @@ ThemeData buildAppTheme(Brightness brightness) {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppDesignTokens.radius12),
-        borderSide: BorderSide(color: scheme.primary, width: 2),
+        borderSide: BorderSide(color: scheme.secondary, width: 2),
       ),
       contentPadding: const EdgeInsets.all(AppDesignTokens.space16),
     ),
@@ -203,7 +221,12 @@ ThemeData buildAppTheme(Brightness brightness) {
       ),
       side: BorderSide(color: scheme.outlineVariant),
       labelStyle: textTheme.labelLarge,
+      selectedColor: scheme.secondaryContainer,
+      secondaryLabelStyle: textTheme.labelLarge?.copyWith(
+        color: scheme.onSecondaryContainer,
+      ),
     ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: scheme.secondary),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: scheme.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,

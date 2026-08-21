@@ -8,6 +8,8 @@ import 'collection_management_screen.dart';
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
 
+  static const _gridMaxWidth = 536.0;
+
   static const List<Map<String, Object>> categories = [
     {
       'title': 'Breakfast',
@@ -31,7 +33,7 @@ class ExploreScreen extends StatelessWidget {
     },
   ];
 
-  // Caps category width while allowing more columns on tablets.
+  // Keeps the centered two-by-two category grid at every window size.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +41,7 @@ class ExploreScreen extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: AppConstrainedContent(
-              maxWidth: AppBreakpoints.wideContent,
+              maxWidth: _gridMaxWidth,
               padding: EdgeInsets.fromLTRB(
                 AppBreakpoints.gutter(context),
                 24,
@@ -55,13 +57,13 @@ class ExploreScreen extends StatelessWidget {
           SliverLayoutBuilder(
             builder: (context, constraints) {
               final gutter = AppBreakpoints.gutter(context);
-              final side = ((constraints.crossAxisExtent - AppBreakpoints.wideContent) / 2)
+              final side = ((constraints.crossAxisExtent - _gridMaxWidth) / 2)
                   .clamp(gutter, double.infinity);
               return SliverPadding(
                 padding: EdgeInsets.fromLTRB(side, 0, side, 32),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 260,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
                     childAspectRatio: 0.92,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,

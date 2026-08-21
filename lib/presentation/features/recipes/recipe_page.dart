@@ -60,10 +60,10 @@ class _RecipePageState extends State<RecipePage> with TickerProviderStateMixin {
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                labelColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                labelColor: Theme.of(context).colorScheme.onSecondaryContainer,
                 unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
                 padding: EdgeInsets.fromLTRB(leftPadding, 4, 12, 8),
                 tabs: const [
